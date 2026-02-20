@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='Rental Extras')}"></head>
+<body class="bg-dark text-light">
+<!-- Navigation bar -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-9">
+
+            <!-- Title Section -->
+            <h2 class="text-center mb-4">Rental Extras</h2>
+
+            <!-- New Extra Button: Opens the form for adding a new rental extra -->
+            <div class="text-center mb-4">
+                <button class="btn btn-success btn-sm" data-bs-target="#newExtraForm"
+                        data-bs-toggle="collapse" type="button">
+                    <i class="bi bi-plus-lg me-1"></i> Add New Extra
+                </button>
+            </div>
+
+            <!-- New Extra Form: Collapsible form for adding new extra -->
+            <div class="collapse mb-4" id="newExtraForm">
+                <div class="card bg-card border-0 shadow-sm">
+                    <div class="card-body p-3">
+                        <!-- Form for adding a new extra -->
+                        <form method="post" th:action="@{/addExtras}">
+                            <div class="row g-2">
+                                <!-- Name input -->
+                                <div class="col">
+                                    <label class="form-label form-label-sm">Name</label>
+                                    <input class="form-control form-control-sm" name="name" required type="text"/>
+                                </div>
+                                <!-- Price input -->
+                                <div class="col-auto">
+                                    <label class="form-label form-label-sm">Price</label>
+                                    <input class="form-control form-control-sm" name="price" required step="0.01"
+                                           type="number"/>
+                                </div>
+                                <!-- Submit and Cancel buttons -->
+                                <div class="col-auto d-flex align-items-end">
+                                    <button class="btn btn-primary btn-sm me-2" type="submit">
+                                        <i class="bi bi-check-circle me-1"></i> Save
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" data-bs-target="#newExtraForm"
+                                            data-bs-toggle="collapse" type="button">
+                                        <i class="bi bi-x-circle me-1"></i> Cancel
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role Filter + Search: Form for filtering/searching extras -->
+            <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+                <div class="col-auto">
+                    <form class="d-flex" method="get" th:action="@{/extras}">
+                        <div class="input-group input-group-sm w-auto">
+                            <input class="form-control"
+                                   name="searchQuery"
+                                   placeholder="Search name or id"
+                                   th:value="${searchQuery}"
+                                   type="text"/>
+                            <button class="btn btn-outline-light" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- List of Extras: Display extras as cards -->
+            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3" th:if="${!#lists.isEmpty(page.content)}">
+                <!-- Loop through each extra and display it -->
+                <div class="col" th:each="extra : ${page.content}">
+                    <div class="card bg-card border-0 shadow-sm">
+                        <div class="card-body d-flex flex-column justify-content-between">
+
+                            <!-- Extra Header: Displays name, id, and price -->
+                            <div class="mb-3">
+                                <h5 class="fw-bold mb-2">
+                                    <span class="text-secondary">#<span th:text="${extra.id}"></span></span>
+                                    <span class="ms-2" th:text="${extra.name}"></span>
+                                </h5>
+                                <div class="text-success fw-semibold fs-6 d-inline-flex align-items-center">
+                                    <i class="bi bi-cash-coin me-1"></i>
+                                    <span th:text="${extra.price} + ' $'"></span>
+                                </div>
+                            </div>
+
+                            <!-- Actions: Edit and Delete buttons -->
+                            <div class="d-flex justify-content-end gap-2 align-content-center">
+                                <!-- Edit Button -->
+                                <div class="mt-3">
+                                    <button class="btn btn-primary btn-sm"
+                                            data-bs-toggle="collapse"
+                                            th:attr="data-bs-target='#editForm__' + ${extra.id}"
+                                            type="button">
+                                        <i class="bi bi-pencil-square me-1"></i> Edit
+                                    </button>
+                                </div>
+
+                                <!-- Delete Button (Custom form included) -->
+                                <div class="mt-3">
+                                    <div th:replace="~{fragments/formField :: delete-btn('/deleteExtras','extra',extra,'')}"></div>
+                                </div>
+                            </div>
+
+                            <!-- Edit Form (Collapsed initially): For modifying extra -->
+                            <div class="collapse mt-3" th:id="'editForm__' + ${extra.id}">
+                                <form class="pt-3 border-top border-secondary-subtle" method="post"
+                                      th:action="@{/updateExtras}">
+                                    <!-- Hidden input for ID -->
+                                    <input name="id" th:value="${extra.id}" type="hidden"/>
+                                    <div class="row g-2">
+                                        <!-- Edit Name input -->
+                                        <div class="col-8">
+                                            <label class="form-label form-label-sm">Name</label>
+                                            <input class="form-control form-control-sm" name="name" required
+                                                   th:value="${extra.name}"/>
+                                        </div>
+                                        <!-- Edit Price input -->
+                                        <div class="col-4">
+                                            <label class="form-label form-label-sm">Price</label>
+                                            <input class="form-control form-control-sm" name="price" required
+                                                   step="0.01" th:value="${extra.price}"
+                                                   type="number"/>
+                                        </div>
+                                    </div>
+                                    <!-- Save and Cancel buttons -->
+                                    <div class="text-end mt-3 d-grid gap-2 d-md-flex justify-content-md-end">
+                                        <button class="btn btn-success btn-sm px-3 py-1" type="submit">
+                                            <i class="bi bi-check-circle me-1"></i> Save
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm px-3 py-1"
+                                                data-bs-toggle="collapse"
+                                                th:attr="data-bs-target='#editForm__' + ${extra.id}" type="button">
+                                            <i class="bi bi-x-circle me-1"></i> Cancel
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State: Message displayed when no extras are available -->
+            <div class="text-center py-5" th:if="${#lists.isEmpty(page.content)}">
+                <p class="fs-4 text-muted">No extras found</p>
+            </div>
+
+            <!-- Pagination: Navigation to browse through pages of extras -->
+            <nav class="mt-4" th:if="${page.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <!-- Previous page button (disabled if on first page) -->
+                    <li class="page-item" th:classappend="${page.pageNumber == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/extras(page=${page.pageNumber - 1})}">Previous
+                        </a>
+                    </li>
+                    <!-- Current page information -->
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                          Page <span th:text="${page.pageNumber + 1}"></span> of <span
+                                th:text="${page.totalPages}"></span>
+                        </span>
+                    </li>
+                    <!-- Next page button (disabled if on last page) -->
+                    <li class="page-item" th:classappend="${page.pageNumber + 1 >= page.totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{/extras(page=${page.pageNumber + 1})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+</body>
+</html>

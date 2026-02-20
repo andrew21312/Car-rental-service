@@ -1,0 +1,71 @@
+<!DOCTYPE HTML>
+<html data-bs-theme="dark" lang="uk">
+<head th:replace="~{fragments/headers::head(title='Add Car model')}"></head>
+<body class="bg-dark text-light">
+
+<!-- Navigation Bar -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<!-- Main Content Area for Adding Car Model -->
+<div class="container-lg my-5">
+    <div class="row justify-content-center">
+        <div class="col-11 col-md-7 col-lg-5">
+
+            <!-- Card Container for Form -->
+            <div class="card bg-body-tertiary bg-opacity-25 border-0 shadow-lg rounded-4">
+
+                <!-- Card Header with Title -->
+                <div class="card-header bg-primary text-light text-center">
+                    <h2 class="mb-0"><i class="bi bi-stack me-1"></i> Add a car model</h2>
+                </div>
+
+                <!-- Card Body with Form -->
+                <div class="card-body p-4">
+                    <!-- Form for adding car model -->
+                    <form class="row g-3" method="POST" th:action="@{/addCarModel}"
+                          th:object="${carModel}">
+
+                        <!-- Car Brand Field -->
+                        <div th:replace="~{fragments/formField :: form-Field-generic(brand, 'Brand', 'col-4')}"></div>
+
+                        <!-- Car Model Field -->
+                        <div th:replace="~{fragments/formField :: form-Field-generic(model, 'Model', 'col-4')}"></div>
+
+                        <!-- Car Year Field -->
+                        <div th:replace="~{fragments/formField :: form-Field-generic(year, 'Year', 'col-4')}"></div>
+
+                        <!-- Engine Type Dropdown -->
+                        <div
+                                th:replace="~{fragments/formField :: form-select-primitive(engineType, 'Engine type:', engineTypes, 'col-6')}"></div>
+
+                        <!-- Transmission Type Dropdown -->
+                        <div
+                                th:replace="~{fragments/formField :: form-select-primitive(transmission, 'Transmission:', transmissionTypes, 'col-6')}"></div>
+
+                        <!-- Seats Field -->
+                        <div th:replace="~{fragments/formField :: form-Field-generic(seats, 'Seats', 'col-12')}"></div>
+
+                        <!-- Price Per Day Field -->
+                        <div
+                                th:replace="~{fragments/formField :: form-Field-generic(price, 'Price per day', 'col-12')}"></div>
+
+                        <!-- Submit Button -->
+                        <div class="col-12 d-flex justify-content-center gap-3 mt-3">
+                            <button class="btn btn-success" type="submit">
+                                <i class="bi bi-check-circle me-1"></i> Add
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Card Footer with Navigation Link -->
+                <div class="card-footer bg-transparent text-center">
+                    <small class="text-muted"><a class="link-primary" href="/carModels">Back to list</a></small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

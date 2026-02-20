@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='Car Models')}">Car Models</head>
+<body class="bg-dark text-light">
+
+<!-- Navigation Bar -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-9">
+            <!-- Page Title -->
+            <h2 class="text-center mb-4">Car Models</h2>
+
+            <!-- Filter and Search Section -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="d-inline-block">Filter and Search</h5>
+                    <div class="d-inline-block">
+                        <button class="btn btn-danger btn-sm" onclick="clearFilters()">Clear Filters</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                        <!-- Engine Type Filter -->
+                        <div class="flex-grow-1">
+                            <label class="form-label" for="engineTypeSelect">
+                                <i class="bi bi-car-front"></i> Engine Type
+                            </label>
+                            <select class="form-select form-select-sm" id="engineTypeSelect"
+                                    onchange="updateEngineTypeFilter(this)">
+                                <option value="">All Engines</option>
+                                <option th:each="e : ${engineTypes}" th:selected="${e.name() == engineType}"
+                                        th:text="${e.capitalizedName}" th:value="${e.name()}"></option>
+                            </select>
+                        </div>
+
+                        <!-- Seats type -->
+                        <div class="flex-grow-1">
+                            <label class="form-label" for="seats">
+                                <i class="bi bi-person-lines-fill"></i> Seats
+                            </label>
+                            <select class="form-select form-select-sm" id="seats" onchange="updateSeatsFilter(this)">
+                                <option value="">Number of seats</option>
+                                <option th:each="s : ${seatsTypes}" th:selected="${s == seats}" th:text="${s}"
+                                        th:value="${s}"></option>
+                            </select>
+                        </div>
+
+                        <!-- Page Size Selector -->
+                        <div class="flex-grow-1">
+                            <label class="form-label" for="pageSizeSelect">
+                                <i class="bi bi-file-earmark-text"></i> Results per page
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <select class="form-select" id="pageSizeSelect" onchange="updatePageSize(this)">
+                                    <option th:selected="${page.pageSize == 5}" value="5">5</option>
+                                    <option th:selected="${page.pageSize == 10}" value="10">10</option>
+                                    <option th:selected="${page.pageSize == 25}" value="25">25</option>
+                                    <option th:selected="${page.pageSize == 50}" value="50">50</option>
+                                    <option th:selected="${page.pageSize == 100}" value="100">100</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Sorting Options -->
+                        <div class="flex-grow-1">
+                            <label class="form-label" for="sortBySelect">
+                                <i class="bi bi-sort-up"></i> Sort By
+                            </label>
+                            <select class="form-select form-select-sm" id="sortBySelect" onchange="updateSort(this)">
+                                <option th:selected="${sortBy == 'priceDesc'}" value="priceDesc">Price ↓</option>
+                                <option th:selected="${sortBy == 'priceAsc'}" value="priceAsc">Price ↑</option>
+                                <option th:selected="${sortBy == 'yearDesc'}" value="yearDesc">Year ↓</option>
+                                <option th:selected="${sortBy == 'yearAsc'}" value="yearAsc">Year ↑</option>
+                                <option th:selected="${sortBy == 'modelIdDesc'}" value="modelIdDesc">Model id ↓</option>
+                                <option th:selected="${sortBy == 'modelIdAsc'}" value="modelIdAsc">Model id ↑</option>
+                            </select>
+                        </div>
+
+                        <!-- Search by Model ID and Model Name -->
+                        <div class="flex-grow-1">
+                            <label class="form-label" for="modelIdSearch">
+                                <i class="bi bi-search"></i> Search
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <input class="form-control form-control-sm" id="modelIdSearch"
+                                       placeholder="Search by model id" th:value="${modelIdSearch}" type="number">
+                                <input class="form-control form-control-sm" id="modelNameSearch"
+                                       placeholder="Search by model name" th:value="${modelNameSearch}" type="text">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="buildSearchUrl()"
+                                        type="button">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Car Models Displayed as Cards -->
+            <div class="card bg-card border-0 mb-3 shadow-sm" th:each="model : ${page.content}">
+                <div class="card-body d-flex flex-column flex-md-row justify-content-between gap-3">
+                    <div class="flex-grow-1">
+                        <!-- Car Model Title and Info -->
+                        <h5 class="card-title text-light mb-2">
+                            #<span th:text="${model.id}"></span>
+                            <small class="text-muted"
+                                   th:text="${model.getCarModelInfo()}"></small>
+                        </h5>
+
+                        <!-- Car Model Features -->
+                        <p class="card-text text-light mb-1">
+                            <i class="bi bi-fuel-pump me-1"></i>
+                            <strong th:text="${model.engineType.capitalizedName}"></strong>
+                            &nbsp;|&nbsp;
+                            <i class="bi bi-person-fill me-1"></i>
+                            <span th:text="${model.seats + ' seats'}"></span>
+                            &nbsp;|&nbsp;
+                            <i class="bi bi-gear-fill me-1"></i>
+                            <span th:text="${model.transmission.capitalizedName}"></span>
+                        </p>
+
+                        <!-- Price Tag -->
+                        <div class="d-flex flex-wrap gap-2">
+                            <span class="badge bg-success" th:text="${model.price + ' $/day'}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Edit and Delete Actions -->
+                    <div class="d-flex flex-column justify-content-around">
+                        <!-- Edit Button -->
+                        <a class="btn btn-primary btn-sm mb-1" th:href="@{/updateCarModel(id=${model.id})}">
+                            <i class="bi bi-pencil-fill"></i> Edit
+                        </a>
+
+                        <!-- Delete Button (Dynamic Fragment) -->
+                        <div th:replace="~{fragments/formField :: delete-btn('/deleteCarModel','carModel',model, w-100)}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State when no models are found -->
+            <div class="text-center py-5" th:if="${#lists.isEmpty(page.content)}">
+                <p class="fs-4 text-muted">No car models found</p>
+            </div>
+
+            <!-- Pagination for Car Models -->
+            <nav class="mt-4" th:if="${page.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <!-- Previous Page Button (disabled if on the first page) -->
+                    <li class="page-item" th:classappend="${page.pageNumber == 0} ? 'disabled'">
+                        <button class="page-link" th:onclick="|goToPage(${page.pageNumber - 1})|">Previous</button>
+                    </li>
+
+                    <!-- Current Page Indicator -->
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                          Page <span th:text="${page.pageNumber + 1}"></span> of <span
+                                th:text="${page.totalPages}"></span>
+                        </span>
+                    </li>
+
+                    <!-- Next Page Button (disabled if on the last page) -->
+                    <li class="page-item" th:classappend="${page.pageNumber + 1 >= page.totalPages} ? 'disabled'">
+                        <button class="page-link" th:onclick="|goToPage(${page.pageNumber + 1})|">Next</button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+</body>
+
+<!-- External Scripts -->
+<script src="/filters.js"></script>
+
+<!-- Custom JavaScript -->
+<script>
+    // Search fields used in filters
+    searchFields = [
+        {id: 'modelIdSearch', param: 'modelId'},
+        {id: 'modelNameSearch', param: 'modelName'},
+        {id: 'engineTypeSelect', param: 'engineType'},
+        {id: 'sortBySelect', param: 'sortBy'},
+        {id: 'seats', param: 'seats'}
+    ];
+
+    /**
+     * Retrieves custom search parameters for the filters and validates the modelId.
+     * If modelId is less than or equal to 0, it's excluded from the search.
+     *
+     * @returns {Object} - The filtered search parameters.
+     */
+    function getCustomSearchParams() {
+        const params = getSearchParams(searchFields);
+        const modelId = params.get('modelId');
+        // Validate: exclude modelId if it is less than or equal to 0
+        if (modelId && parseInt(modelId) <= 0) {
+            params.delete('modelId');
+        }
+        return params;
+    }
+
+    /**
+     * Updates the engine type filter when the dropdown value is changed.
+     *
+     * @param {HTMLElement} selectElement - The select dropdown element for engine type.
+     */
+    function updateEngineTypeFilter(selectElement) {
+        updateFilter(selectElement, 'engineType');
+    }
+
+    function updateSeatsFilter(selectElement) {
+        updateFilter(selectElement, 'seats');
+    }
+
+    // Adding event listeners for handling "Enter" key in search inputs
+    const searchInputs = document.querySelectorAll('#modelIdSearch, #modelNameSearch');
+    handleEnterKeyForSearch(searchInputs);
+</script>
+
+</html>

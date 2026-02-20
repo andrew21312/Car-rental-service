@@ -1,0 +1,95 @@
+<!DOCTYPE HTML>
+<html data-bs-theme="dark" lang="uk" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/headers::head(title='Car Details')}"></head>
+<body class="bg-dark text-light">
+
+<!-- Navigation Bar -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<!-- Main Content Section -->
+<div class="container-lg my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+
+            <!-- Car Details Card -->
+            <div class="card border-0 shadow-lg rounded-4 bg-body-tertiary mb-4">
+
+                <!-- Card Header: Title -->
+                <div class="card-header bg-primary text-light text-center py-3">
+                    <h2 class="mb-0 fw-semibold text-uppercase">Car Details</h2>
+                </div>
+
+                <!-- Card Body: Car Specifications -->
+                <div class="card-body p-4">
+                    <!-- Car Model Information: Title -->
+                    <h5 class="card-title text-center text-primary mb-3" th:text="${carModel.getCarModelInfo()}"></h5>
+
+                    <!-- Car Specifications (Engine, Transmission, Seats, Price) -->
+                    <div class="row text-center text-light small mb-3">
+                        <!-- Engine Type -->
+                        <div class="col-6 col-sm-3 mb-2">
+                            <i class="bi bi-fuel-pump-fill fs-4 text-primary"></i><br/>
+                            <span class="d-block fw-semibold">Engine</span>
+                            <span th:text="${carModel.engineType}">Petrol</span>
+                        </div>
+
+                        <!-- Transmission Type -->
+                        <div class="col-6 col-sm-3 mb-2">
+                            <i class="bi bi-gear-fill fs-4 text-primary"></i><br/>
+                            <span class="d-block fw-semibold">Transmission</span>
+                            <span th:text="${carModel.transmission}">Auto</span>
+                        </div>
+
+                        <!-- Number of Seats -->
+                        <div class="col-6 col-sm-3 mb-2">
+                            <i class="bi bi-people-fill fs-4 text-primary"></i><br/>
+                            <span class="d-block fw-semibold">Seats</span>
+                            <span th:text="${carModel.seats}">5</span>
+                        </div>
+
+                        <!-- Price Per Day -->
+                        <div class="col-6 col-sm-3 mb-2">
+                            <i class="bi bi-cash-stack fs-4 text-primary"></i><br/>
+                            <span class="d-block fw-semibold">Price</span>
+                            <span th:text="${carModel.price + ' $'}">100 $</span>
+                        </div>
+                    </div>
+
+                    <!-- Divider Line -->
+                    <hr class="my-4 border-light opacity-25"/>
+
+                    <!-- Action Buttons: Rent, Login Prompt, Back -->
+                    <div class="text-center">
+                        <div class="d-flex justify-content-center gap-3 mt-4" role="group">
+
+                            <!-- Rent Button (Visible only to users with CLIENT authority) -->
+                            <th:block sec:authorize="hasAuthority('CLIENT')">
+                                <form class="d-inline" method="get" th:action="@{/rentCar}">
+                                    <input name="modelId" th:value="${carModel.id}" type="hidden"/>
+                                    <button class="btn btn-success" type="submit">
+                                        <i class="bi bi-car-front-fill me-1"></i> Rent
+                                    </button>
+                                </form>
+                            </th:block>
+
+                            <!-- Login Prompt (Visible only to unauthenticated users) -->
+                            <th:block sec:authorize="!isAuthenticated()">
+                                <a class="btn btn-warning" href="/signIn">
+                                    <i class="bi bi-box-arrow-in-right me-1"></i> Login to Rent
+                                </a>
+                            </th:block>
+
+                            <!-- Back Button -->
+                            <a class="btn btn-outline-secondary" th:href="@{/}">
+                                <i class="bi bi-arrow-left me-1"></i> Back
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

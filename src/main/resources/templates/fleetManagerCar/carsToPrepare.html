@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='Cars to Prepare')}">Cars to prepare</head>
+<body class="bg-dark text-light">
+<!-- Navigation Bar -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<!-- Main Container -->
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+            <!-- Page Title -->
+            <h2 class="text-center mb-4">Cars to Prepare</h2>
+
+            <!-- Status Filter -->
+            <div class="d-flex justify-content-center gap-2 mb-4">
+                <div class="btn-group" role="group">
+                    <!-- Loop through statuses to display filter buttons -->
+                    <a class="btn btn-outline-light btn-sm"
+                       th:classappend="${currentStatus == status.key} ? 'active btn-primary' : ''"
+                       th:each="status : ${statuses.entrySet()}"
+                       th:href="@{/carsToPrepare(status=${status.key})}">
+                        <span th:text="${status.value}"></span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Display Cars as Cards -->
+            <div class="card bg-card border-0 mb-3 shadow-sm" th:each="car : ${page.content}">
+                <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+                    <!-- Car Information Section -->
+                    <div class="flex-grow-1">
+                        <!-- Car Rental ID and Plate Number -->
+                        <h5 class="card-title text-light mb-1">
+                            #<span th:text="${car.rentalId}"></span> –
+                            <span class="text-info" th:text="${car.plateNumber}"></span>
+                            <small class="text-muted" th:text="${car.modelName}"></small>
+                        </h5>
+                        <p class="text-muted mb-2">
+                            <!-- Next Rental Date -->
+                            <i class="bi bi-calendar-event me-1"></i>
+                            Next rental: <span th:text="${car.formattedNextRentalDate}"></span>
+                        </p>
+
+                        <!-- Rental Extras (if any) -->
+                        <div class="mt-2" th:if="${!#lists.isEmpty(car.rentalExtras)}">
+                            <div class="d-flex flex-wrap gap-1">
+                                <!-- Display each rental extra -->
+                                <span class="badge bg-secondary d-flex align-items-center"
+                                      th:each="extra : ${car.rentalExtras}">
+                                        <i class="bi bi-star-fill text-warning me-1"></i>
+                                        <span th:text="${extra.name}"></span>
+                                    </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Car Action Buttons Section -->
+                    <div class="text-end d-flex flex-column gap-2" style="width: 180px;"> <!-- Set fixed width -->
+
+                        <!-- If the car status is "READY_FOR_PICKUP" -->
+                        <div class="d-flex flex-column gap-2" th:if="${car.status == ready}">
+                            <button class="btn btn-success btn-sm w-100" disabled>
+                                <i class="bi bi-check-circle me-1"></i> Ready for pickup
+                            </button>
+                        </div>
+
+                        <!-- If the car status is NOT "READY_FOR_PICKUP" -->
+                        <div class="d-flex flex-column gap-2" th:if="${car.status != ready}">
+                            <!-- Report Issue Button -->
+                            <button class="btn btn-warning btn-sm w-100"
+                                    data-bs-toggle="collapse"
+                                    th:attr="data-bs-target='#reportCollapse__' + ${car.rentalId}"
+                                    type="button">
+                                <i class="bi bi-exclamation-triangle-fill me-1"></i> Report Issue
+                            </button>
+
+                            <!-- Mark Car as Prepared (if allowed) -->
+                            <form class="w-100 m-0"
+                                  method="post"
+                                  th:action="@{/prepareCar}"
+                                  th:if="${car.showPrepareButton}">
+                                <input name="rentalId" th:value="${car.rentalId}" type="hidden"/>
+                                <input name="plateNumber" th:value="${car.plateNumber}" type="hidden"/>
+                                <button class="btn btn-success btn-sm w-100"
+                                        th:id="'preparedButton__' + ${car.rentalId}"
+                                        type="submit">
+                                    <i class="bi bi-check2-circle me-1"></i> Mark as Prepared
+                                </button>
+                            </form>
+
+                            <!-- If car cannot be prepared yet -->
+                            <button class="btn btn-outline-secondary btn-sm w-100"
+                                    disabled
+                                    th:if="${!car.showPrepareButton}"
+                                    th:title="${car.availableDate}">
+                                <i class="bi bi-clock-history me-1"></i>
+                                <span th:text="${car.availableDate}"></span>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Report Issue Collapse (Form to report issues) -->
+                <div class="collapse" th:id="'reportCollapse__' + ${car.rentalId}">
+                    <div class="card card-body bg-secondary bg-opacity-50">
+                        <form class="row g-2" method="post" th:action="@{/reportIssue}">
+                            <input name="carId" th:value="${car.carId}" type="hidden"/>
+                            <div class="col-12">
+                                    <textarea class="form-control form-control-sm" name="message"
+                                              placeholder="Enter issue description…"
+                                              required rows="2"></textarea>
+                            </div>
+                            <div class="col-12 text-end">
+                                <button class="btn btn-warning btn-sm" type="submit">
+                                    <i class="bi bi-envelope-send me-1"></i> Submit
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State (when no cars are found) -->
+            <div class="text-center py-5" th:if="${#lists.isEmpty(page.content)}">
+                <p class="fs-4 text-muted">No cars to prepare found</p>
+            </div>
+
+            <!-- Pagination -->
+            <nav class="mt-4" th:if="${page.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <!-- Previous Page Button -->
+                    <li class="page-item" th:classappend="${page.pageNumber == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/carsToPrepare(page=${page.pageNumber - 1})}">Previous</a>
+                    </li>
+                    <!-- Current Page Info -->
+                    <li class="page-item disabled">
+                            <span class="page-link">
+                                Page <span th:text="${page.pageNumber + 1}"></span> of <span
+                                    th:text="${page.totalPages}"></span>
+                            </span>
+                    </li>
+                    <!-- Next Page Button -->
+                    <li class="page-item" th:classappend="${page.pageNumber + 1 >= page.totalPages} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/carsToPrepare(page=${page.pageNumber + 1})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        // Toggle disabled state of the 'Prepared' button when the 'Report Issue' collapse is shown/hidden
+        document.querySelectorAll('[id^="reportCollapse__"]').forEach(collapseEl => {
+            collapseEl.addEventListener('shown.bs.collapse', () => {
+                const id = collapseEl.id.split('__')[1];
+                const button = document.getElementById('preparedButton__' + id);
+                button.disabled = true;
+            });
+            collapseEl.addEventListener('hidden.bs.collapse', () => {
+                const id = collapseEl.id.split('__')[1];
+                const button = document.getElementById('preparedButton__' + id);
+                button.disabled = false;
+            });
+        });
+
+        // Add confirmation before submitting the form to prepare a car
+        document.querySelectorAll('.prepared-form').forEach(form => {
+            form.addEventListener('submit', e => {
+                e.preventDefault();  // Prevent form submission
+
+                const plateNumber = form.querySelector('input[name="plateNumber"]').value;
+
+                Swal.fire({
+                    text: 'Are you sure you want to prepare car with plate number: ' + plateNumber + ' ?',
+                    icon: 'question',
+                    background: '#2e2a3a',
+                    color: '#fff',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes',
+                    cancelButtonText: 'No'
+                }).then(res => res.isConfirmed && form.submit());  // Submit form if confirmed
+            });
+        });
+    });
+</script>
+</body>
+</html>

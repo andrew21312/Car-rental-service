@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='Sign Up')}"></head>
+<body class="bg-dark text-light">
+
+<!-- Centered Container for the Sign Up Form -->
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <!-- Card with Sign Up Form -->
+    <div class="card bg-dark-subtle border-0 shadow-lg w-100" style="max-width: 400px;">
+
+        <!-- Card Header: Title -->
+        <div class="card-header bg-primary text-light text-center">
+            <h2 class="mb-0"><i class="bi bi-person-plus me-1"></i> Sign Up</h2>
+        </div>
+
+        <!-- Card Body: Form for User Information -->
+        <div class="card-body p-4">
+            <form class="row g-3" method="POST" th:action="@{/signUp}" th:object="${user}">
+
+                <!-- Username Field -->
+                <div th:replace="~{fragments/formField :: form-Field-generic(username, 'Username', 'col-12')}"></div>
+
+                <!-- First Name Field -->
+                <div th:replace="~{fragments/formField :: form-Field-generic(firstName, 'First name', 'col-6')}"></div>
+
+                <!-- Last Name Field -->
+                <div th:replace="~{fragments/formField :: form-Field-generic(lastName, 'Last name', 'col-6')}"></div>
+
+                <!-- Password Field -->
+                <div th:replace="~{fragments/formField :: form-Field-generic(password, 'Password', 'col-12')}"></div>
+
+                <!-- Phone Number Field -->
+                <div th:replace="~{fragments/formField :: form-Field-generic(phoneNumber, 'Phone number', 'col-12')}"></div>
+
+                <!-- Submit and Cancel Buttons -->
+                <div class="d-flex justify-content-center gap-2 mt-3 btn-group-form">
+                    <button class="btn btn-success" type="submit">
+                        <i class="bi bi-check-circle me-1"></i>
+                        <span>Sign Up</span>
+                    </button>
+                    <a class="btn btn-secondary" href="/"> <i class="bi bi-x-circle me-1"></i> Cancel</a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Card Footer: Sign In Link for Existing Users -->
+        <div class="card-footer bg-transparent text-center">
+            <small class="text-muted">
+                Already have an account?
+                <a class="link-primary" href="/signIn">Sign In</a>
+            </small>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='Main Menu & Car Models')}"></head>
+<body class="bg-dark text-light">
+
+<!-- Navbar -->
+<nav class="container navbar navbar-expand-lg navbar-dark navbar-custom shadow-sm sticky-top rounded" id="navBar">
+    <div class="container-lg">
+        <a class="navbar-brand text-light" href="/">Car Rental</a>
+        <button aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation" class="navbar-toggler"
+                data-bs-target="#mainNav" data-bs-toggle="collapse" type="button">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                <!-- Users -->
+                <li class="nav-item dropdown" sec:authorize="hasAuthority('SUPER_ADMIN')">
+                    <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       id="usersDropdown" role="button">
+                        <i class="bi bi-people-fill me-1"></i> Users
+                    </a>
+                    <ul aria-labelledby="usersDropdown" class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" href="/users">All Users</a></li>
+                        <li><a class="dropdown-item" href="/createUser">Create User</a></li>
+                    </ul>
+                </li>
+                <li class="nav-item dropdown" sec:authorize="hasAuthority('SUPER_ADMIN')">
+                    <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       id="extrasDropdown" role="button">
+                        <i class="bi bi-gear-fill me-1"></i> Extras
+                    </a>
+                    <ul aria-labelledby="extrasDropdown" class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" href="/extras">All Extras</a></li>
+                    </ul>
+                </li>
+                <!-- Cars -->
+                <li class="nav-item dropdown" sec:authorize="hasAuthority('FLEET_MANAGER')">
+                    <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       id="carsDropdown" role="button">
+                        <i class="bi bi-car-front-fill me-1"></i> Cars
+                    </a>
+                    <ul aria-labelledby="carsDropdown" class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" href="/cars">All Cars</a></li>
+                        <li><a class="dropdown-item" href="/addCar">Add Car</a></li>
+                    </ul>
+                </li>
+                <!-- Models -->
+                <li class="nav-item dropdown" sec:authorize="hasAuthority('FLEET_MANAGER')">
+                    <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       id="modelsDropdown" role="button">
+                        <i class="bi bi-stack me-1"></i> Models
+                    </a>
+                    <ul aria-labelledby="modelsDropdown" class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" href="/carModels">All Models</a></li>
+                        <li><a class="dropdown-item" href="/addCarModel">Add Model</a></li>
+                    </ul>
+                </li>
+                <!-- Prepare -->
+                <li class="nav-item dropdown" sec:authorize="hasAuthority('FLEET_MANAGER')">
+                    <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       id="prepareDropdown" role="button">
+                        <i class="bi bi-card-checklist me-1"></i> Prepare
+                    </a>
+                    <ul aria-labelledby="prepareDropdown" class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" href="/carsToPrepare">Cars to Prepare</a></li>
+                        <li><a class="dropdown-item" href="/carsIssues">Car Issues</a></li>
+                    </ul>
+                </li>
+                <!-- Rentals -->
+                <li class="nav-item dropdown" sec:authorize="hasAnyAuthority('ADMIN','SUPER_ADMIN')">
+                    <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       id="rentalsDropdown" role="button">
+                        <i class="bi bi-card-checklist me-1"></i> Rentals
+                    </a>
+                    <ul aria-labelledby="rentalsDropdown" class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" href="/rentals">All Rentals</a></li>
+                    </ul>
+                </li>
+                <!-- Logs -->
+                <li class="nav-item dropdown" sec:authorize="hasAuthority('SUPER_ADMIN')">
+                    <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                       id="logsDropdown" role="button">
+                        <i class="bi bi-journal-text me-1"></i> Logs
+                    </a>
+                    <ul aria-labelledby="logsDropdown" class="dropdown-menu dropdown-menu-dark">
+                        <li><a class="dropdown-item" href="/logs">All Logs</a></li>
+                    </ul>
+                </li>
+            </ul>
+
+            <ul class="navbar-nav">
+                <th:block sec:authorize="isAuthenticated()">
+                    <li class="nav-item dropdown">
+                        <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
+                           id="userMenu" role="button">
+                            <i class="bi bi-person-circle me-1"></i><span th:text="${#authentication.name}"></span>
+                        </a>
+                        <ul aria-labelledby="userMenu" class="dropdown-menu dropdown-menu-dark dropdown-menu-end">
+                            <li><a class="dropdown-item" href="/profile">
+                                <i class="bi bi-person-lines-fill me-1"></i> Profile
+                            </a></li>
+                            <li sec:authorize="hasAuthority('CLIENT')">
+                                <a class="dropdown-item" href="/rentHistory">
+                                    <i class="bi bi-clock-history me-1"></i> Rent History
+                                </a>
+                            </li>
+                            <li><a class="dropdown-item" href="/logout">
+                                <i class="bi bi-box-arrow-right me-1"></i> Logout
+                            </a></li>
+                        </ul>
+                    </li>
+                </th:block>
+                <th:block sec:authorize="!isAuthenticated()">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/signIn">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/signUp">
+                            <i class="bi bi-pencil-square me-1"></i> Sign Up
+                        </a>
+                    </li>
+                </th:block>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Filters -->
+<div class="container mt-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-4 mb-4 col-9 mx-auto">
+
+        <!-- Filter Card -->
+        <div class="card shadow-sm w-100">
+            <div class="card-body">
+                <div class="row g-3">
+
+                    <!-- Engine Type -->
+                    <div class="col-md-3">
+                        <label class="form-label" for="engineType">
+                            <i class="bi bi-car-front"></i> Engine Type
+                        </label>
+                        <select class="form-select form-select-sm" id="engineType"
+                                onchange="updateEngineTypeFilter(this)">
+                            <option value="">All Engines</option>
+                            <option th:each="e : ${engineTypes}"
+                                    th:selected="${e.name == engineType}"
+                                    th:text="${e.getCapitalizedName()}"
+                                    th:value="${e.name}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Seats -->
+                    <div class="col-md-3">
+                        <label class="form-label" for="seats">
+                            <i class="bi bi-person-lines-fill"></i> Seats
+                        </label>
+                        <select class="form-select form-select-sm" id="seats" onchange="updateSeatsFilter(this)">
+                            <option value="">Number of seats</option>
+                            <option th:each="s : ${seatsTypes}"
+                                    th:selected="${s == seats}"
+                                    th:text="${s}"
+                                    th:value="${s}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Results per Page -->
+                    <div class="col-md-3">
+                        <label class="form-label" for="pageSizeSelect">
+                            <i class="bi bi-file-earmark-text"></i> Results per Page
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <select class="form-select form-select-sm" id="pageSizeSelect"
+                                    onchange="updatePageSize(this)">
+                                <option th:selected="${page.pageSize == 4}" value="4">4</option>
+                                <option th:selected="${page.pageSize == 8}" value="8">8</option>
+                                <option th:selected="${page.pageSize == 12}" value="12">12</option>
+                                <option th:selected="${page.pageSize == 16}" value="16">16</option>
+                                <option th:selected="${page.pageSize == 20}" value="20">20</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Sort By -->
+                    <div class="col-md-3">
+                        <label class="form-label" for="sortBySelect">
+                            <i class="bi bi-sort-up"></i> Sort By
+                        </label>
+                        <select class="form-select form-select-sm" id="sortBySelect" onchange="updateSort(this)"
+                                th:name="sortBy">
+                            <option th:selected="${sortBy == 'priceDesc'}" value="priceDesc">Price ↓</option>
+                            <option th:selected="${sortBy == 'priceAsc'}" value="priceAsc">Price ↑</option>
+                            <option th:selected="${sortBy == 'yearDesc'}" value="yearDesc">Year ↓</option>
+                            <option th:selected="${sortBy == 'yearAsc'}" value="yearAsc">Year ↑</option>
+                        </select>
+                    </div>
+
+                    <!-- Search -->
+                    <div class="col-md-12">
+                        <label class="form-label" for="modelQuery">
+                            <i class="bi bi-search"></i> Search by Model
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <input class="form-control form-control-sm" id="modelQuery"
+                                   placeholder="Search by model name" th:value="${modelQuery}" type="text">
+                            <button class="btn btn-outline-light btn-sm" onclick="buildSearchUrl()" type="button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Car Models Grid -->
+<div class="container-lg my-4">
+    <div class="row g-4">
+        <div class="col-sm-6 col-md-4 col-lg-3" th:each="model : ${page.content}">
+            <div class="card bg-body-tertiary border-0 shadow-lg rounded-4 h-100">
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title fw-semibold text-light" th:text="${model.getCarModelInfo()}"></h5>
+
+                    <div class="row row-cols-2 text-body-secondary small mb-3 g-1">
+                        <div class="col">
+                            <i class="bi bi-fuel-pump fs-5 text-info me-1"></i>
+                            <span th:text="${model.engineType}">Diesel</span>
+                        </div>
+                        <div class="col">
+                            <i class="bi bi-person-fill fs-5 text-warning me-1"></i>
+                            <span th:text="${model.seats}">5</span>
+                        </div>
+                        <div class="col">
+                            <i class="bi bi-gear-fill fs-5 text-success me-1"></i>
+                            <span th:text="${model.transmission}">Auto</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-auto">
+                        <p class="fs-5 fw-bold mb-3 text-white">
+                            <span class="text-success">$</span>
+                            <span th:text="${model.price}">100</span> <span class="text-muted">/day</span>
+                        </p>
+                        <a class="btn btn-primary btn-sm w-100 shadow rounded-3"
+                           th:href="@{/carDetails/{id}(id=${model.id})}">
+                            <i class="bi bi-info-circle me-1"></i> Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Empty State -->
+<div class="text-center py-5" th:if="${#lists.isEmpty(page.content)}">
+    <p class="fs-4 text-muted">No car models found</p>
+</div>
+
+<!-- Pagination -->
+<nav class="mt-4" th:if="${page.totalPages > 1}">
+    <ul class="pagination justify-content-center">
+        <!-- Previous Page Button (disabled if on the first page) -->
+        <li class="page-item" th:classappend="${page.pageNumber == 0} ? 'disabled'">
+            <button class="page-link" th:onclick="|goToPage(${page.pageNumber - 1})|">Previous</button>
+        </li>
+
+        <!-- Current Page Indicator -->
+        <li class="page-item disabled">
+                        <span class="page-link">
+                          Page <span th:text="${page.pageNumber + 1}"></span> of <span
+                                th:text="${page.totalPages}"></span>
+                        </span>
+        </li>
+
+        <!-- Next Page Button (disabled if on the last page) -->
+        <li class="page-item" th:classappend="${page.pageNumber + 1 >= page.totalPages} ? 'disabled'">
+            <button class="page-link" th:onclick="|goToPage(${page.pageNumber + 1})|">Next</button>
+        </li>
+    </ul>
+</nav>
+</body>
+
+<script src="/filters.js"></script>
+
+<script>
+
+    searchFields = [
+        {id: 'modelQuery', param: 'modelQuery'},
+        {id: 'engineType', param: 'engineType'},
+        {id: 'sortBySelect', param: 'sortBy'},
+        {id: 'seats', param: 'seats'}
+
+    ]
+
+    function updateEngineTypeFilter(selectElement) {
+        updateFilter(selectElement, 'engineType');
+    }
+
+    function updateSeatsFilter(selectElement) {
+        updateFilter(selectElement, 'seats');
+    }
+
+    const searchInputs = document.querySelectorAll('#modelQuery');
+    handleEnterKeyForSearch(searchInputs);
+</script>
+</html>

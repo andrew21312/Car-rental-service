@@ -1,0 +1,182 @@
+/*
+ * Global Styles and Utilities
+ */
+.hidden {
+    /* Hides elements from view */
+    display: none;
+}
+
+.fieldError {
+    /* Error text color for form validation */
+    color: red;
+}
+
+/* Base Typography */
+html, body {
+    /* Sets default font family */
+    font-family: "Comfortaa", serif !important;
+}
+
+/* Alert Components */
+.alert {
+    /* Styles for alert messages */
+    display: inline-block;
+    margin-right: 10px;
+    margin-top: 0.1rem;
+    padding: 0.1rem 1.0rem;
+}
+
+/* Table Styles */
+.table-hover tbody tr:hover {
+    /* Hover effect for table rows */
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* List Item Styles */
+.custom-list-item:hover {
+    /* Hover effect for custom list items */
+    background-color: rgba(255, 255, 255, 0.15) !important;
+    transition: background-color 0.3s ease-in-out;
+}
+
+/* Dropdown Components */
+.ts-dropdown {
+    /* Styles for dropdown elements */
+    color: #aaa !important;
+    border-radius: 3px !important;
+    padding: 5px !important;
+}
+
+.ts-control {
+    /* Styles for ts-control elements */
+    color: #fff;
+    padding-top: 1.5rem !important;
+}
+
+/* Background Utilities */
+.bg-opacity-15 {
+    /* Background opacity utility */
+    --bs-bg-opacity: 0.15;
+}
+
+/* Navigation Bar */
+.navbar-custom {
+    /* Custom navbar background */
+    background-color: rgb(19, 79, 187);
+}
+
+/* Card Background */
+.bg-card {
+    /* Card background color */
+    background: #2c2f33;
+}
+
+/* Sticky Table Headers */
+thead th {
+    /* Makes table headers sticky */
+    position: sticky;
+    top: 0;
+    background-color: #1e1e2f;
+    z-index: 2;
+}
+
+/*
+ * Pill Components - Status Indicators
+ */
+.pill {
+    /* Base pill style */
+    display: inline-block;
+    padding: 0.1rem 0.65rem;
+    border-radius: 0.375rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: center;
+    white-space: nowrap;
+    color: #fff !important;
+}
+
+/* Payment Statuses */
+.pill-pending {
+    /* Pending payment status */
+    background-color: #6c757d; /* gray */
+}
+
+.pill-paid,
+.pill-completed,
+.pill-available {
+    /* Successful payment status */
+    background-color: #28a745; /* green */
+}
+
+.pill-cancelled,
+.pill-rejected_technical {
+    /* Failed payment status */
+    background-color: #dc3545; /* red */
+}
+
+/* Rental Statuses */
+.pill-ready_for_pickup {
+    /* Rental ready for pickup */
+    background-color: #ffc107; /* yellow */
+    color: #000 !important;
+}
+
+.pill-approved {
+    /* Approved rental */
+    background-color: #17a2b8; /* cyan */
+}
+
+.pill-cancelled-status {
+    /* Cancelled rental */
+    background-color: #dc3545; /* red */
+}
+
+.pill-active,
+.pill-maintenance {
+    /* Active or maintenance status */
+    background-color: #007bff; /* blue */
+}
+
+/* User Roles */
+.pill-super_admin {
+    /* Super admin role */
+    background-color: #dc3545; /* red */
+}
+
+.pill-admin {
+    /* Admin role */
+    background-color: #007bff; /* blue */
+}
+
+.pill-client {
+    /* Client role */
+    background-color: #28a745; /* green */
+}
+
+.pill-fleet_manager {
+    /* Fleet manager role */
+    background-color: #dda600; /* yellow */
+}
+
+/*
+ * Form Elements
+ */
+.form-label {
+    /* Form label styling */
+    color: #ccc;
+}
+
+.is-invalid + .invalid-feedback {
+    /* Shows validation error messages */
+    display: block;
+}
+
+.btn-group-form button {
+    /* Minimum width for form buttons */
+    min-width: 100px;
+}
+
+.w-20 {
+    /* Width utility class */
+    width: 20% !important;
+}

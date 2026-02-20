@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='Cars')}">Cars</head>
+<body class="bg-dark text-light">
+<!-- Main Navigation Bar: Reused from the main page template -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<!-- Container for the Cars list page -->
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-9">
+            <!-- Page Title: Cars -->
+            <h2 class="text-center mb-4">Cars</h2>
+
+            <!-- Filter and Search Section -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="d-inline-block">Filter and Search</h5>
+                    <div class="d-inline-block">
+                        <!-- Кнопка очищення фільтрів -->
+                        <button class="btn btn-danger btn-sm" onclick="clearFilters()">Clear Filters</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                        <!-- Car Status Filter Dropdown -->
+                        <div class="flex-grow-1">
+                            <label class="form-label" for="statusSelect">
+                                <i class="bi bi-card-checklist"></i> Status
+                            </label>
+                            <select class="form-select form-select-sm" id="statusSelect"
+                                    onchange="updateFilterByCarStatus(this)">
+                                <option value="">All statuses</option>
+                                <option th:each="status : ${statusTypes}" th:selected="${status.id == statusId}"
+                                        th:text="${'#' + status.id + ' – ' + status.carStatusNameCapitalized}"
+                                        th:value="${status.id}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Page Size Selection -->
+                        <div class="flex-grow-1">
+                            <label class="form-label" for="pageSizeSelect">
+                                <i class="bi bi-file-earmark-text"></i> Per page
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <select class="form-select" id="pageSizeSelect" onchange="updatePageSize(this)">
+                                    <option th:selected="${page.pageSize == 5}" value="5">5</option>
+                                    <option th:selected="${page.pageSize == 10}" value="10">10</option>
+                                    <option th:selected="${page.pageSize == 25}" value="25">25</option>
+                                    <option th:selected="${page.pageSize == 50}" value="50">50</option>
+                                    <option th:selected="${page.pageSize == 100}" value="100">100</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Sorting Options -->
+                        <div class="flex-grow-1">
+                            <label class="form-label" for="sortBySelect">
+                                <i class="bi bi-sort-up"></i> Sort By
+                            </label>
+                            <select class="form-select form-select-sm" id="sortBySelect" onchange="updateSort(this)">
+                                <option th:selected="${sortBy == 'carIdAsc'}" value="carIdAsc">Car id ↑</option>
+                                <option th:selected="${sortBy == 'carIdDesc'}" value="carIdDesc">Car id ↓</option>
+                            </select>
+                        </div>
+
+                        <!-- Car Model Filter Dropdown -->
+                        <div class="flex-grow-1 flex-md-grow-0">
+                            <label class="form-label" for="modelSelect">
+                                <i class="bi bi-car-front"></i> Car Model
+                            </label>
+                            <select class="form-select form-select-sm" id="modelSelect"
+                                    onchange="updateFilterByCarModel(this)">
+                                <option value="">All Models</option>
+                                <option th:each="m : ${allCarModels}" th:selected="${m.id == modelId}"
+                                        th:text="${m.carModelInfo}" th:value="${m.id}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Car Search Section -->
+                        <div class="flex-grow-1 w-auto">
+                            <label class="form-label" for="carIdSearch">
+                                <i class="bi bi-search"></i> Search
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <!-- Search by Car ID -->
+                                <input class="form-control form-control-sm" id="carIdSearch"
+                                       placeholder="Search by car id"
+                                       th:value="${carIdSearch}" type="number">
+                                <!-- Search by Car Plate Number -->
+                                <input class="form-control form-control-sm" id="carPlateNumberSearch"
+                                       placeholder="Search by car plate number"
+                                       th:value="${carPlateNumberSearch}" type="text">
+                                <!-- Search Button -->
+                                <button class="btn btn-outline-secondary btn-sm" onclick="buildSearchUrl()"
+                                        type="button">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Display Cars as Cards -->
+            <div class="card bg-card border-0 mb-3 shadow-sm" th:each="car : ${page.content}">
+                <div class="card-body d-flex flex-column flex-md-row justify-content-between gap-3">
+                    <!-- Car Information Section -->
+                    <div class="flex-grow-1">
+                        <h5 class="card-title text-light mb-2">
+                            <!-- Car ID and Model Info -->
+                            #<span th:text="${car.id}"></span>
+                            <small class="text-muted" th:text="${car.model.carModelInfo}"></small>
+                        </h5>
+                        <p class="card-text text-light mb-1">
+                            <i class="bi bi-card-number me-1"></i>
+                            <strong th:text="${car.plateNumber}"></strong>
+                            &nbsp;|&nbsp;
+                            <i class="bi bi-droplet-fill me-1"></i>
+                            <span th:text="${car.color}"></span>
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <!-- Display Car Status (Capitalized) -->
+                            <span th:class="'pill pill-' + ${car.carStatuses.carStatusNameLowerCase}"
+                                  th:text="${car.carStatuses.carStatusNameCapitalized}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Car Action Buttons -->
+                    <div class="d-flex flex-column justify-content-around">
+                        <!-- Link to Manage Car -->
+                        <a class="btn btn-primary btn-sm mb-1" th:href="@{/manageCar(id=${car.id})}">
+                            <i class="bi bi-gear-fill"></i> Manage Car
+                        </a>
+                        <!-- Button for Deleting the Car (using a fragment) -->
+                        <div th:replace="~{fragments/formField :: delete-btn('/deleteCar','car',car, w-100)}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State: Displayed if no cars are found -->
+            <div class="text-center py-5" th:if="${#lists.isEmpty(page.content)}">
+                <p class="fs-4 text-muted">No cars found</p>
+            </div>
+
+            <!-- Pagination Controls -->
+            <nav class="mt-4" th:if="${page.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <!-- Previous Page Button -->
+                    <li class="page-item" th:classappend="${page.pageNumber == 0} ? 'disabled'">
+                        <button class="page-link" th:onclick="|goToPage(${page.pageNumber - 1})|">Previous</button>
+                    </li>
+                    <!-- Current Page Info -->
+                    <li class="page-item disabled">
+                            <span class="page-link">
+                              Page <span th:text="${page.pageNumber + 1}"></span> of <span
+                                    th:text="${page.totalPages}"></span>
+                            </span>
+                    </li>
+                    <!-- Next Page Button -->
+                    <li class="page-item" th:classappend="${page.pageNumber + 1 >= page.totalPages} ? 'disabled'">
+                        <button class="page-link" th:onclick="|goToPage(${page.pageNumber + 1})|">Next</button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+</body>
+
+<!-- External scripts (reusable fragments) -->
+<script src="/filters.js"></script>
+
+<script>
+    // Configuration of search fields for the "Cars" page
+    searchFields = [
+        {id: 'carIdSearch', param: 'carId'},           // Search by car ID
+        {id: 'carPlateNumberSearch', param: 'carPlateNumber'},  // Search by car plate number
+        {id: 'statusSelect', param: 'statusId'},       // Search by status
+        {id: 'modelSelect', param: 'modelId'},         // Search by car model
+        {id: 'sortBySelect', param: 'sortBy'}          // Sorting option
+    ];
+
+    /**
+     * Function to get search parameters with additional validation for carId.
+     * @returns {object} - An object containing search parameters.
+     */
+    function getCustomSearchParams() {
+        const params = getSearchParams(searchFields);
+        const carId = params.get('carId');
+        // Validation: Exclude carId if it's less than or equal to 0
+        if (params.get('carId') && parseInt(params.get('carId')) <= 0) {
+            params.delete('carId');
+        }
+        return params;
+    }
+
+    /**
+     * Update the filter by selected car model.
+     * @param {HTMLElement} selectElement - The select element for the car model filter.
+     */
+    function updateFilterByCarModel(selectElement) {
+        updateFilter(selectElement, 'modelId');
+    }
+
+    /**
+     * Update the filter by selected car status.
+     * @param {HTMLElement} selectElement - The select element for the car status filter.
+     */
+    function updateFilterByCarStatus(selectElement) {
+        updateFilter(selectElement, 'statusId');
+    }
+
+    // Adding an event listener for the 'Enter' key to trigger the search
+    const searchInputs = document.querySelectorAll('#carIdSearch, #carPlateNumberSearch');
+    handleEnterKeyForSearch(searchInputs);
+</script>
+</html>

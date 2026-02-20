@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='Car Issues')}">Car Issues</head>
+<body class="bg-dark text-light">
+<!-- Navigation Bar: This fragment is reused from the main page -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<!-- Main content container -->
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+
+            <!-- Title for the page -->
+            <h2 class="text-center mb-4">Car Issues</h2>
+
+            <!-- Filter buttons for status (All, Pending, Resolved) -->
+            <div class="d-flex justify-content-center gap-2 mb-4">
+                <div class="btn-group" role="group">
+                    <!-- All Issues button: Active when no status filter is selected -->
+                    <a class="btn btn-outline-light btn-sm"
+                       th:classappend="${reportStatus == null} ? 'active btn-primary' : ''"
+                       th:href="@{/carsIssues}">All</a>
+
+                    <!-- Pending Issues button: Active when 'PENDING' status is selected -->
+                    <a class="btn btn-outline-light btn-sm"
+                       th:classappend="${reportStatus == 'PENDING'} ? 'active btn-primary' : ''"
+                       th:href="@{/carsIssues(reportStatus='PENDING')}">Pending</a>
+
+                    <!-- Resolved Issues button: Active when 'RESOLVED' status is selected -->
+                    <a class="btn btn-outline-light btn-sm"
+                       th:classappend="${reportStatus == 'RESOLVED'} ? 'active btn-primary' : ''"
+                       th:href="@{/carsIssues(reportStatus='RESOLVED')}">Resolved</a>
+                </div>
+            </div>
+
+            <!-- Issue Reports as Cards -->
+            <!-- Each report is displayed as a card using a loop to iterate over the page content -->
+            <div class="card bg-card border-0 mb-3 shadow-sm" th:each="report : ${page.content}">
+                <div class="card-body d-flex flex-column flex-md-row justify-content-between align-items-start gap-3">
+                    <!-- Report details (car info, issue description, status, etc.) -->
+                    <div class="flex-grow-1">
+                        <h5 class="card-title text-light mb-2">
+                            <!-- Display the issue ID and car plate number -->
+                            #<span th:text="${report.id + 1}"></span> –
+                            <small class="text-muted" th:text="${report.car.plateNumber}"></small>
+                        </h5>
+                        <p class="card-text text-light mb-1">
+                            <!-- Car model information -->
+                            <i class="bi bi-car-front-fill me-1"></i>
+                            <span th:text="${report.car.model.getCarModelInfo()}"></span>
+                        </p>
+                        <p class="card-text text-light mb-2">
+                            <!-- Issue description -->
+                            <strong>Description:</strong> <span th:text="${report.message}"></span>
+                        </p>
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+                            <!-- Display the status of the issue (Pending/Resolved) -->
+                            <span class="badge bg-warning text-dark" th:if="${report.status.name() == 'PENDING'}">Pending</span>
+                            <span class="badge bg-success" th:if="${report.status.name() == 'RESOLVED'}">Resolved</span>
+                        </div>
+                        <small class="text-muted d-block">
+                            <!-- Issue creation date -->
+                            Created: <span th:text="${report.getFormattedCreatedAt()}"></span>
+                        </small>
+                        <small class="text-success d-block" th:if="${report.status.name() == 'RESOLVED'}">
+                            <!-- Resolved date (only if the issue is resolved) -->
+                            Resolved at: <span th:text="${report.getFormattedResolvedAt()}"></span>
+                        </small>
+                    </div>
+
+                    <!-- Resolve button for pending issues -->
+                    <div class="text-end">
+                        <form class="resolved-form" method="post"
+                              th:action="@{/resolveIssue}"
+                              th:attr="data-confirm='Resolve issue #' + ${report.id} + '?'"
+                              th:if="${report.status.name() == 'PENDING'}">
+                            <!-- Hidden input to send the report ID -->
+                            <input name="reportId" th:value="${report.id}" type="hidden"/>
+                            <button class="btn btn-success btn-sm mb-1" type="submit">
+                                <i class="bi bi-check-circle-fill"></i> Resolve
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State: Displayed if there are no reports -->
+            <div class="text-center py-5" th:if="${#lists.isEmpty(page.content)}">
+                <p class="fs-4 text-muted">No reports found</p>
+            </div>
+
+            <!-- Pagination: Displayed if there are multiple pages of reports -->
+            <nav class="mt-4" th:if="${page.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <!-- Previous page button: Disabled if on the first page -->
+                    <li class="page-item" th:classappend="${page.pageNumber == 0} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/carsIssues(page=${page.pageNumber - 1}, reportStatus=${reportStatus})}">Previous</a>
+                    </li>
+
+                    <!-- Current page info (e.g., "Page 1 of 3") -->
+                    <li class="page-item disabled">
+                            <span class="page-link">
+                                Page <span th:text="${page.pageNumber + 1}"></span> of <span
+                                    th:text="${page.totalPages}"></span>
+                            </span>
+                    </li>
+
+                    <!-- Next page button: Disabled if on the last page -->
+                    <li class="page-item" th:classappend="${page.pageNumber + 1 >= page.totalPages} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/carsIssues(page=${page.pageNumber + 1}, reportStatus=${reportStatus})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- SweetAlert script for resolving issues -->
+<script>
+    // Event listener for the resolve issue form submission
+    document.addEventListener('DOMContentLoaded', () => {
+        document.querySelectorAll('.resolved-form').forEach(form => {
+            form.addEventListener('submit', e => {
+                e.preventDefault();  // Prevent default form submission
+                const msg = form.dataset.confirm;  // Get confirmation message
+                Swal.fire({
+                    text: msg,  // Display confirmation message
+                    icon: 'question',  // Show question icon
+                    background: '#2e2a3a',  // Dark background
+                    color: '#fff',  // White text color
+                    showCancelButton: true,  // Show cancel button
+                    confirmButtonText: 'Yes',  // Confirm button text
+                    cancelButtonText: 'No',  // Cancel button text
+                }).then(result => result.isConfirmed && form.submit());  // Submit form if confirmed
+            });
+        });
+    });
+</script>
+</body>
+</html>

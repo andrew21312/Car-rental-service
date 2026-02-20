@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='Login')}"></head>
+<body class="bg-dark text-light">
+
+<!-- Main Content Container: Centering the login card -->
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <!-- Card with login form -->
+    <div class="card bg-dark-subtle border-0 shadow-lg" style="max-width: 400px; width: 100%;">
+
+        <!-- Card Header: Title -->
+        <div class="card-header bg-primary text-light text-center h3">
+            <!-- Logo and App Name -->
+            <a class="navbar-brand mb-0" href="/">Car Rental</a>
+        </div>
+
+        <!-- Card Body: The login form -->
+        <div class="card-body p-4">
+            <!-- Form for login -->
+            <form class="row g-3" method="post" th:action="@{/signIn}">
+
+                <!-- Username Field -->
+                <div class="col-12 form-floating">
+                    <input class="form-control form-element" id="username" name="username"
+                           placeholder="Username" required type="text">
+                    <label class="mx-1" for="username"><i class="bi bi-person-fill me-1"></i> Username</label>
+                </div>
+
+                <!-- Password Field -->
+                <div class="col-12 form-floating">
+                    <input class="form-control form-element" id="password" name="password"
+                           placeholder="Password" required type="password">
+                    <label class="mx-1" for="password"><i class="bi bi-lock-fill me-1"></i> Password</label>
+                </div>
+
+                <!-- Buttons for Login and Signup -->
+                <div class="col-12 d-grid gap-2">
+                    <button class="btn btn-success btn-lg" type="submit">
+                        <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                    </button>
+                    <a class="btn btn-outline-light btn-sm" th:href="@{/signUp}">
+                        <i class="bi bi-pencil-square me-1"></i> Sign Up
+                    </a>
+                </div>
+            </form>
+
+            <!-- Test Credentials (For development/testing purposes) -->
+            <div class="mt-4 d-flex flex-wrap justify-content-center gap-2">
+                <button class="btn btn-outline-secondary btn-sm" onclick="fillCredentials('sadmin','sadmin123')"
+                        type="button">SAdmin
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="fillCredentials('admin','admin123')"
+                        type="button">Admin
+                </button>
+                <button class="btn btn-outline-secondary btn-sm"
+                        onclick="fillCredentials('fleet_manager','fleet_manager123')"
+                        type="button">Fleet
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="fillCredentials('client','client123')"
+                        type="button">Client
+                </button>
+            </div>
+        </div>
+
+        <!-- Footer: Copyright Text -->
+        <div class="card-footer bg-transparent border-0 text-center text-muted small">
+            © 2025 Car Rental
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript to Autofill Test Credentials -->
+<script>
+    function fillCredentials(u, p) {
+        document.getElementById('username').value = u;
+        document.getElementById('password').value = p;
+    }
+</script>
+
+<!-- Error Alert (Triggered when there's an authentication error) -->
+<script th:if="${param.error}" th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+        Swal.fire({
+            text: 'Incorrect username or password',
+            icon: 'error',
+            background: '#2e2a3a',
+            color: '#fff',
+            confirmButtonText: 'ОК'
+        });
+    });
+</script>
+
+</body>
+</html>

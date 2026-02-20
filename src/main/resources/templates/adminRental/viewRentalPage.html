@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:sec="http://www.w3.org/1999/xhtml">
+<head th:replace="~{fragments/headers::head(title='Rental Details')}"></head>
+<body class="bg-dark text-light">
+
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<div class="container-lg my-5">
+    <div class="card bg-dark-subtle border-0 shadow-lg mx-auto" style="max-width: 800px;">
+        <!--
+            Header Section - Displays rental ID
+            Uses Thymeleaf to dynamically show the rental number
+        -->
+        <div class="card-header bg-primary text-light text-center">
+            <h2 class="mb-0" th:text="${'Rental #' + rental.id}"></h2>
+        </div>
+
+        <!--
+            Navigation Tabs - Provides two main views:
+            1. Details - Main rental information and management controls
+            2. Receipt - Detailed cost breakdown and payment information
+        -->
+        <ul class="nav nav-tabs" id="rentalTab" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" data-bs-target="#detailsTab" data-bs-toggle="tab" id="details-tab"
+                        role="tab" type="button">
+                    <i class="bi bi-info-circle me-1"></i> Details
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-target="#receiptTab" data-bs-toggle="tab" id="receipt-tab"
+                        role="tab" type="button">
+                    <i class="bi bi-receipt-cutoff me-1"></i> Receipt
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- Details Tab Pane -->
+            <div class="tab-pane fade show active" id="detailsTab" role="tabpanel">
+                <!--
+                    Metadata Section - Shows creation/updated timestamps and rental status indicators
+                    Uses Thymeleaf to dynamically display payment and rental status pills
+                -->
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center px-3 py-2 border-bottom bg-body-secondary">
+                    <div class="text-muted small">
+                        Created: <span th:text="${rental.getFormattedCreatedAt()}"></span><br/>
+                        Updated: <span th:text="${rental.getFormattedUpdatedAt()}"></span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2 mt-2 mt-md-0">
+                        <span class="pill px-2 py-1"
+                              th:classappend="' pill-' + ${rental.paymentStatus.lowercaseName}"
+                              th:if="${rental.getPaymentStatus().name == 'PAID'}"
+                              th:text="'Paid'"></span>
+                        <span class="pill px-2 py-1"
+                              th:classappend="' pill-' + ${rental.paymentStatus.lowercaseName}"
+                              th:if="${rental.getPaymentStatus().name == 'PENDING'}"
+                              th:text="'Waiting for payment'"></span>
+                        <span class="pill px-2 py-1"
+                              th:classappend="' pill-' + ${rental.paymentStatus.lowercaseName}"
+                              th:if="${rental.getPaymentStatus().name == 'CANCELLED'}"
+                              th:text="'Cancelled'"></span>
+                        <span class="pill px-2 py-1"
+                              th:classappend="' pill-' + ${rental.rentalStatuses.lowercaseName}"
+                              th:text="${rental.rentalStatuses.getNameCapitalized()}"></span>
+                    </div>
+                </div>
+
+                <!-- Body -->
+                <div class="card-body p-4">
+                    <div class="row g-4 mb-4">
+                        <!--
+                            Car Information Section - Displays:
+                            - Car model details (linked to car details page)
+                            - Daily rental price
+                            - Total rental cost
+                        -->
+                        <div class="col-md-6">
+                            <div class="card bg-secondary bg-opacity-10 border-0 h-100">
+                                <div class="card-body p-3">
+                                    <h5 class="text-info mb-3">
+                                        <i class="bi bi-car-front-fill me-2"></i>Car Information
+                                    </h5>
+                                    <p>
+                                        <a class="text-info text-decoration-none fw-semibold"
+                                           th:href="@{/carDetails/{id}(id=${rental.carId})}"
+                                           th:text="${rental.getCarModelInfo + ' | ' + rental.plateNumber}">Model
+                                            Info</a>
+                                    </p>
+                                    <div class="d-flex align-items-center mb-2">
+                                        <i class="bi bi-cash-stack me-2 text-secondary"></i>
+                                        <strong>Price/day:</strong>
+                                        <span class="ms-2" th:text="${rental.price + ' $'}">50 $</span>
+                                    </div>
+
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-currency-dollar me-2 text-success"></i>
+                                        <strong>Total:</strong>
+                                        <span class="ms-2 fw-bold text-success"
+                                              th:text="${rental.totalCost + ' $'}">150 $</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!--
+                            Client Information Section - Shows:
+                            - Client name
+                            - Contact phone number
+                        -->
+                        <div class="col-md-6">
+                            <div class="card bg-secondary bg-opacity-10 border-0 h-100">
+                                <div class="card-body p-3">
+                                    <h5 class="text-info mb-3">
+                                        <i class="bi bi-person-fill me-2"></i>Client Information
+                                    </h5>
+
+                                    <div class="d-flex align-items-center mb-3 text-muted">
+                                        <i class="bi bi-person-circle me-2 text-primary"></i>
+                                        <strong>Name:</strong>
+                                        <span class="ms-2"
+                                              th:text="${rental.client.firstName + ' ' + rental.client.lastName}">John Doe</span>
+                                    </div>
+
+                                    <div class="d-flex align-items-center text-muted">
+                                        <i class="bi bi-telephone-fill me-2 text-success"></i>
+                                        <strong>Phone:</strong>
+                                        <span class="ms-2" th:text="${rental.client.phoneNumber}">+380501234567</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--
+                       Rental Dates Section - Displays:
+                       - Start date
+                       - End date
+                       - Total rental duration in days -->
+                    <div class="card bg-secondary bg-opacity-10 border-0 mt-4">
+                        <div class="card-body p-3">
+                            <h5 class="text-info mb-3">
+                                <i class="bi bi-calendar-event me-2"></i>Rental Dates
+                            </h5>
+                            <div class="row text-muted text-center">
+                                <div class="col-md-4 d-flex justify-content-center align-items-center mb-2">
+                                    <i class="bi bi-calendar-check-fill me-2 text-success"></i>
+                                    <strong>Start:</strong>
+                                    <span class="ms-2" th:text="${rental.getStartDateFormated()}">2025-05-10</span>
+                                </div>
+                                <div class="col-md-4 d-flex justify-content-center align-items-center mb-2">
+                                    <i class="bi bi-calendar-x-fill me-2 text-danger"></i>
+                                    <strong>End:</strong>
+                                    <span class="ms-2" th:text="${rental.getEndDateFormated()}">2025-05-13</span>
+                                </div>
+                                <div class="col-md-4 d-flex justify-content-center align-items-center mb-2">
+                                    <i class="bi bi-clock-history me-2 text-primary"></i>
+                                    <strong>Duration:</strong>
+                                    <span class="ms-2" th:text="${rental.getRentalDays()} + ' days'">3 days</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--
+                        Additional Services Section - Allows admin to:
+                        - View and modify rental extras
+                        - Toggle extras with checkboxes
+                        - Save changes to extras selection
+                    -->
+                    <form class="mt-4" method="post" th:action="@{/updateRentalExtras}">
+                        <input name="rentalId" th:value="${rental.id}" type="hidden"/>
+                        <div class="card bg-secondary bg-opacity-10 border-0">
+                            <div class="card-body p-3">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h5 class="text-info mb-0">Additional Options</h5>
+                                    <button class="btn btn-warning btn-sm" id="editExtrasBtn" type="button">
+                                        <i class="bi bi-pencil-square me-1"></i> Edit
+                                    </button>
+                                </div>
+                                <div class="row row-cols-1 row-cols-md-2 g-2">
+                                    <div class="col" th:each="opt : ${rentalExtras}">
+                                        <label class="form-check form-check-inline">
+                                            <input class="form-check-input" disabled name="selectedExtras"
+                                                   th:attr="data-price=${opt.price}"
+                                                   th:checked="${#lists.contains(rental.rentalExtrasIds, opt.id)}"
+                                                   th:id="'extra__' + ${opt.id}"
+                                                   th:value="${opt.id}" type="checkbox"/>
+                                            <span class="form-check-label"
+                                                  th:text="${opt.name + ' (' + opt.price + '$/d)'}">GPS (5$/d)</span>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="text-end mt-3">
+                                    <button class="btn btn-success" disabled id="saveExtrasBtn" type="submit">
+                                        <i class="bi bi-save me-1"></i> Save
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!--
+                        Admin Actions Section - Contains two main subsections:
+                        1. Rental Status Management - Controls rental workflow states
+                        2. Payment Status Management - Handles payment approval
+                    -->
+                    <div class="card bg-secondary bg-opacity-10 border-0 mt-4">
+                        <div class="card-body p-4">
+                            <div class="row g-3">
+                                <!-- Rental Status -->
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100 shadow-sm">
+                                        <h6 class="text-primary mb-3 d-flex align-items-center gap-2">
+                                            <i class="bi bi-clipboard-check"></i> Rental Status
+                                        </h6>
+                                        <div th:switch="${rental.rentalStatuses.getName()}">
+
+                                            <!-- PENDING -->
+                                            <div class="d-flex gap-2" th:case="'PENDING'">
+                                                <form class="updateRentalStatus" method="post"
+                                                      th:action="@{/updateRentalStatus}"
+                                                      th:attr="data-confirm=${'Are you sure you want to approve this rental?'}">
+                                                    <input name="rentalId" th:value="${rental.id}" type="hidden"/>
+                                                    <input name="newStatus" type="hidden" value="APPROVED"/>
+                                                    <button class="btn btn-outline-success btn-sm" type="submit">Approve
+                                                    </button>
+                                                </form>
+                                                <form class="updateRentalStatus" method="post"
+                                                      th:action="@{/updateRentalStatus}"
+                                                      th:attr="data-confirm=${'Are you sure you want to cancel this rental?'}">
+                                                    <input name="rentalId" th:value="${rental.id}" type="hidden"/>
+                                                    <input name="newStatus" type="hidden" value="CANCELLED"/>
+                                                    <button class="btn btn-outline-danger btn-sm" type="submit">Cancel
+                                                    </button>
+                                                </form>
+                                            </div>
+
+                                            <!-- APPROVED -->
+                                            <div class="d-flex flex-column gap-2" th:case="'APPROVED'">
+                                                <div class="text-secondary small d-flex align-items-center gap-1">
+                                                    <i class="bi bi-hourglass-split"></i> Waiting for fleet manager
+                                                    decision
+                                                </div>
+                                                <form class="updateRentalStatus" method="post"
+                                                      th:action="@{/updateRentalStatus}"
+                                                      th:attr="data-confirm=${'Cancel this rental?'}">
+                                                    <input name="rentalId" th:value="${rental.id}" type="hidden"/>
+                                                    <input name="newStatus" type="hidden" value="CANCELLED"/>
+                                                    <button class="btn btn-outline-danger btn-sm" type="submit">Cancel
+                                                    </button>
+                                                </form>
+                                            </div>
+
+                                            <!-- READY FOR PICKUP -->
+                                            <div class="d-flex gap-2" th:case="'READY FOR PICKUP'">
+                                                <form class="updateRentalStatus" method="post"
+                                                      th:action="@{/updateRentalStatus}"
+                                                      th:attr="data-confirm=${'Activate this rental?'}">
+                                                    <input name="rentalId" th:value="${rental.id}" type="hidden"/>
+                                                    <input name="newStatus" type="hidden" value="ACTIVE"/>
+                                                    <button class="btn btn-outline-info btn-sm" type="submit">Activate
+                                                        Rental
+                                                    </button>
+                                                </form>
+                                                <form class="updateRentalStatus" method="post"
+                                                      th:action="@{/updateRentalStatus}"
+                                                      th:attr="data-confirm=${'Are you sure you want to cancel this rental?'}">
+                                                    <input name="rentalId" th:value="${rental.id}" type="hidden"/>
+                                                    <input name="newStatus" type="hidden" value="CANCELLED"/>
+                                                    <button class="btn btn-outline-danger btn-sm" type="submit">Cancel
+                                                    </button>
+                                                </form>
+                                            </div>
+
+                                            <!-- ACTIVE -->
+                                            <div th:case="'ACTIVE'">
+                                                <form class="updateRentalStatus" method="post"
+                                                      th:action="@{/updateRentalStatus}"
+                                                      th:attr="data-confirm=${'Complete this rental?'}">
+                                                    <input name="rentalId" th:value="${rental.id}" type="hidden"/>
+                                                    <input name="newStatus" type="hidden" value="COMPLETED"/>
+                                                    <button class="btn btn-outline-success btn-sm" type="submit">
+                                                        Complete
+                                                        Rental
+                                                    </button>
+                                                </form>
+                                            </div>
+
+                                            <!-- DEFAULT -->
+                                            <div th:case="*">
+                                                <div class="text-muted small">
+                                                    No actions available
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Payment Status -->
+                                <div class="col-md-6">
+                                    <div class="border rounded-3 p-3 h-100 shadow-sm ">
+                                        <h6 class="text-primary mb-3 d-flex align-items-center gap-2">
+                                            <i class="bi bi-credit-card"></i> Payment Status
+                                        </h6>
+                                        <div th:switch="${rental.paymentStatus.name()}">
+                                            <div th:case="'PENDING'">
+                                                <form class="updateRentalStatus" method="post"
+                                                      th:action="@{/updateRentalPaymentStatus}"
+                                                      th:attr="data-confirm=${'Are you sure you want to approve this rental payment?'}">
+                                                    <input name="rentalId" th:value="${rental.id}" type="hidden"/>
+                                                    <input name="newPaymentStatus" type="hidden" value="PAID"/>
+                                                    <button class="btn btn-outline-success btn-sm" type="submit">Approve
+                                                        Payment
+                                                    </button>
+                                                </form>
+                                            </div>
+                                            <div th:case="*">
+                                                <div class="text-muted small">Payment already processed</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                    <!--
+                        Super Admin Override Section - Only visible to SUPER_ADMIN users
+                        Allows manual override of:
+                        - Rental status
+                        - Payment status
+                    -->
+                    <div class="card bg-secondary bg-opacity-10 border-0 mt-4"
+                         sec:authorize="hasAuthority('SUPER_ADMIN')">
+                        <div class="card-body p-3">
+                            <h5 class="text-info mb-3">Manual Override</h5>
+                            <form method="POST" th:action="@{/updateRental}" th:object="${rentalDTO}">
+                                <input th:field="${rental.id}" type="hidden"/>
+                                <div class="row">
+                                    <div
+                                            th:replace="~{fragments/formField :: form-select-primitive(paymentStatus, 'Payment status: ', rentalPaymentStatuses, 'col-6')}"></div>
+                                    <div
+                                            th:replace="~{fragments/formField :: form-select-object(rentalStatuses, 'Rental status: ', rentalStatuses, getFormattedName, 'col-6')}"></div>
+                                </div>
+                                <div class="text-center mt-3">
+                                    <button class="btn btn-primary" type="submit">
+                                        <i class="bi bi-save me-1"></i> Save
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Back -->
+                    <div class="text-center mt-4">
+                        <a class="btn btn-outline-primary" href="/rentals"><i class="bi bi-arrow-left me-1"></i> Back to
+                            List</a>
+                    </div>
+                </div>
+            </div>
+
+            <!--
+              Receipt Tab - Detailed cost breakdown section
+              Contains four main sections:
+              1. Basic Info - Vehicle and rental period details
+              2. Costs - Price per day and total vehicle cost
+              3. Extras - Additional services and their costs
+              4. Total - Final amount summary
+           -->
+            <div class="tab-pane fade" id="receiptTab" role="tabpanel">
+                <div class="card bg-secondary bg-opacity-10 border-0">
+                    <div class="card-body p-3">
+
+                        <!-- SECTION 1: Basic Info -->
+                        <h6 class="text-uppercase text-muted mb-2">Info</h6>
+                        <ul class="list-group list-group-flush mb-3">
+                            <li class="list-group-item bg-transparent d-flex align-items-center py-2 px-0">
+                                <i class="bi bi-car-front-fill text-info me-2 fs-5"></i>
+                                <div class="flex-grow-1 small">Vehicle</div>
+                                <span th:text="${rental.carModelInfo + ' - ' + rental.plateNumber}">Toyota Corolla</span>
+                            </li>
+                            <li class="list-group-item bg-transparent d-flex align-items-center py-2 px-0">
+                                <i class="bi bi-calendar-event text-warning me-2 fs-5"></i>
+                                <div class="flex-grow-1 small">Period</div>
+                                <span>
+                                    <span th:text="${#temporals.format(rental.startDate, 'dd.MM.yyyy')}">10.05.2025</span>
+                                                &mdash;
+                                    <span th:text="${#temporals.format(rental.endDate, 'dd.MM.yyyy')}">13.05.2025</span>
+                                                                </span>
+                            </li>
+                            <li class="list-group-item bg-transparent d-flex align-items-center py-2 px-0">
+                                <i class="bi bi-clock-history text-primary me-2 fs-5"></i>
+                                <div class="flex-grow-1 small">Duration</div>
+                                <span class="badge bg-info rounded-pill py-1 px-2"
+                                      th:text="${rental.rentalDays + ((rental.rentalDays == 1 || rental.rentalDays == 2) ? ' day' : ' days')}">3
+                                    days</span>
+                            </li>
+                        </ul>
+
+                        <!-- SECTION 2: Costs -->
+                        <h6 class="text-uppercase text-muted mb-2">Costs</h6>
+                        <ul class="list-group list-group-flush mb-3">
+                            <li class="list-group-item bg-transparent d-flex align-items-center py-2 px-0">
+                                <i class="bi bi-cash-stack text-success me-2 fs-5"></i>
+                                <div class="flex-grow-1 small">Price/day</div>
+                                <span class="badge bg-success rounded-pill py-1 px-2"
+                                      th:text="${rental.price + ' USD'}">50 USD</span>
+                            </li>
+                            <li class="list-group-item bg-transparent d-flex align-items-center py-2 px-0">
+                                <i class="bi bi-currency-dollar text-success me-2 fs-5"></i>
+                                <div class="flex-grow-1 small">Vehicle cost</div>
+                                <span class="badge bg-success rounded-pill py-1 px-2"
+                                      th:text="${rental.rentalDays * rental.price + ' USD'}">150 USD</span>
+                            </li>
+                        </ul>
+
+                        <!-- SECTION 3: Extras -->
+                        <h6 class="text-uppercase text-muted mb-2">Extras</h6>
+                        <ul class="list-group list-group-flush mb-3" th:if="${rental.rentalExtras}">
+                            <li class="list-group-item bg-transparent d-flex align-items-center py-2 px-0"
+                                th:each="service : ${rental.rentalExtras}">
+                                <i class="bi bi-star-fill text-warning me-2 fs-5"></i>
+                                <div class="flex-grow-1 small" th:text="${service.name}">GPS</div>
+                                <span class="badge bg-success rounded-pill py-1 px-2"
+                                      th:text="${service.price + ' USD'}">5 USD</span>
+                            </li>
+                        </ul>
+                        <p class="text-center text-muted mb-3"
+                           th:if="${rental.rentalExtras == null or rental.rentalExtras.isEmpty()}">
+                            No additional services.
+                        </p>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="small text-muted">Services cost</div>
+                            <span class="badge bg-success rounded-pill py-1 px-2"
+                                  th:text="${rental.extrasTotalCost + ' USD'}">15 USD</span>
+                        </div>
+
+                        <hr class="my-2"/>
+
+                        <!-- SECTION 4: Total -->
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="fw-semibold">Total amount</div>
+                            <span class="badge bg-primary rounded-pill py-2 px-3 fs-5"
+                                  th:text="${rental.totalCost + ' USD'}">165 USD</span>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+<!--
+    JavaScript Section - Contains two main scripts:
+    1. Status Update Confirmation - Shows SweetAlert confirmation before status changes
+    2. Extras Management - Handles edit/save functionality for additional services
+-->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll('.updateRentalStatus').forEach(function (form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault(); // Забороняємо стандартну поведінку кнопки
+                const message = form.dataset.confirm; // Отримуємо текст повідомлення з data-атрибута
+                Swal.fire({
+                    text: message,
+                    icon: 'question',
+                    background: '#2e2a3a',
+                    color: '#fff',
+                    showCancelButton: true,
+                    confirmButtonText: 'OK',
+                    cancelButtonText: 'Cancel',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit(); // Якщо користувач підтвердив, відправляємо форму
+                    }
+                });
+            });
+        });
+    });
+
+    /* Цей скрипт відповідає за перемикання стану редагування — розблокування чекбоксів,
+   а також за активацію кнопки для збереження змін. */
+    document.addEventListener("DOMContentLoaded", function () {
+        var editBtn = document.getElementById("editExtrasBtn");
+        var saveBtn = document.getElementById("saveExtrasBtn");
+        var checkboxes = document.querySelectorAll("input[name='selectedExtras']");
+
+        editBtn.addEventListener("click", function () {
+            // Перемикаємо стан disabled для всіх чекбоксів
+            checkboxes.forEach(function (chk) {
+                chk.disabled = !chk.disabled;
+            });
+            // Якщо чекбокси розблоковано, активуємо кнопку збереження та змінюємо текст кнопки
+            if (!checkboxes[0].disabled) {
+                saveBtn.disabled = false;
+                editBtn.innerText = "Cancel Edit";
+            } else {
+                saveBtn.disabled = true;
+                editBtn.innerHTML = "<i class=\"bi bi-pencil-square me-1\"></i> Edit";
+            }
+        });
+    });
+
+</script>
+</html>

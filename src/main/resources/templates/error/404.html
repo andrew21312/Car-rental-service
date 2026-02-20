@@ -1,0 +1,19 @@
+<!DOCTYPE HTML>
+<html data-bs-theme="dark" lang="uk">
+<head th:replace="~{fragments/headers::head(title='Page Not Found')}"></head>
+<body class="bg-dark text-light">
+
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<div class="container mt-5">
+    <div class="text-center">
+        <h1 class="display-4">404</h1>
+        <h2 class="mb-3">Page not found</h2>
+        <p class="lead">
+            We're sorry, but the page you are looking for does not exist or has been deleted.
+        </p>
+        <a class="btn btn-primary btn-lg" href="/">Back to the main page</a>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='Rental List')}">Rental List</head>
+<body class="bg-dark text-light">
+
+<!-- Main navigation bar (reused from the fragments) -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-9">
+
+            <!-- Page Title -->
+            <h2 class="text-center mb-4">Rentals</h2>
+
+            <!-- Filter and Search Section -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="d-inline-block">Filter and Search</h5>
+                    <div class="d-inline-block">
+                        <!-- Кнопка очищення фільтрів -->
+                        <button class="btn btn-danger btn-sm" onclick="clearRentalFilters()">Clear Filters</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                        <!-- Filter by rental status -->
+                        <div class="flex-grow-1 w-auto">
+                            <label class="form-label" for="statusSelect">
+                                <i class="bi bi-house-door"></i> Rental Status
+                            </label>
+                            <select class="form-select form-select-sm" id="statusSelect"
+                                    onchange="updateFilterByRentalStatus(this)">
+                                <option value="">All statuses</option>
+                                <option th:each="s : ${rentalStatuses}" th:selected="${s.id == statusId}"
+                                        th:text="${s.getNameCapitalized()}" th:value="${s.id}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Items per page selection -->
+                        <div class="flex-grow-1 w-auto">
+                            <label class="form-label" for="pageSizeSelect">
+                                <i class="bi bi-file-earmark-text"></i> Per Page
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <select class="form-select" id="pageSizeSelect" onchange="updatePageSize(this)">
+                                    <option th:selected="${page.pageSize == 5}" value="5">5</option>
+                                    <option th:selected="${page.pageSize == 10}" value="10">10</option>
+                                    <option th:selected="${page.pageSize == 25}" value="25">25</option>
+                                    <option th:selected="${page.pageSize == 50}" value="50">50</option>
+                                    <option th:selected="${page.pageSize == 100}" value="100">100</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Sorting options -->
+                        <div class="flex-grow-1 w-auto">
+                            <label class="form-label" for="sortBySelect">
+                                <i class="bi bi-sort-up"></i> Sort By
+                            </label>
+                            <select class="form-select form-select-sm" id="sortBySelect" onchange="updateSort(this)">
+                                <option th:selected="${sortBy == 'createdAtDesc'}" value="createdAtDesc">Created Date ↓
+                                </option>
+                                <option th:selected="${sortBy == 'createdAtAsc'}" value="createdAtAsc">Created Date ↑
+                                </option>
+                                <option th:selected="${sortBy == 'startDateDesc'}" value="startDateDesc">Start Date ↓
+                                </option>
+                                <option th:selected="${sortBy == 'startDateAsc'}" value="startDateAsc">Start Date ↑
+                                </option>
+                                <option th:selected="${sortBy == 'rentalIdDesc'}" value="rentalIdDesc">Rental Id ↓
+                                </option>
+                                <option th:selected="${sortBy == 'rentalIdAsc'}" value="rentalIdAsc">Rental Id ↑
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Search by rental id, car plate number, or client last name -->
+                        <div class="flex-grow-1 w-auto">
+                            <label class="form-label" for="rentalIdSearch">
+                                <i class="bi bi-search"></i> Search
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <!-- Search Inputs -->
+                                <input class="form-control form-control-sm" id="rentalIdSearch"
+                                       placeholder="Search by id"
+                                       th:value="${rentalIdSearch}" type="number">
+                                <input class="form-control form-control-sm" id="carPlateNumberSearch"
+                                       placeholder="Search by car plate number"
+                                       th:value="${carPlateNumberSearch}" type="text">
+                                <input class="form-control form-control-sm" id="clientLastNameSearch"
+                                       placeholder="Search by client last name"
+                                       th:value="${clientLastNameSearch}" type="text">
+                                <!-- Search Button -->
+                                <button class="btn btn-outline-secondary btn-sm" onclick="buildSearchUrl()"
+                                        type="button">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rentals List Display as Cards -->
+            <div class="card bg-card border-0 mb-3 shadow-sm" th:each="rentInfo : ${page.content}">
+                <div class="card-body d-flex flex-column flex-md-row justify-content-between gap-3">
+                    <div class="flex-grow-1">
+                        <!-- Rental Information Header -->
+                        <h5 class="card-title text-light mb-2">
+                            #<span th:text="${rentInfo.id}"></span>
+                            <small class="text-muted" th:text="${rentInfo.getClientFullName()}"></small>
+                        </h5>
+
+                        <!-- Car and Payment Information -->
+                        <p class="card-text text-light mb-2">
+                            <i class="bi bi-car-front-fill me-1"></i>
+                            <span th:text="${rentInfo.carModelInfo} + ' | ' + ${rentInfo.plateNumber}"></span>
+                        </p>
+
+                        <!-- Status and Total Cost -->
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+                            <span th:class="'pill pill-' + ${rentInfo.paymentStatus.lowercaseName}"
+                                  th:if="${rentInfo.getPaymentStatus().name == 'PAID'}"
+                                  th:text="'Paid'"></span>
+                            <span th:class="'pill pill-' + ${rentInfo.paymentStatus.lowercaseName}"
+                                  th:if="${rentInfo.getPaymentStatus().name == 'PENDING'}"
+                                  th:text="'Waiting for payment'"></span>
+                            <span th:class="'pill pill-' + ${rentInfo.paymentStatus.lowercaseName}"
+                                  th:if="${rentInfo.getPaymentStatus().name == 'CANCELLED'}"
+                                  th:text="'Cancelled'"></span>
+                            <span th:class="'pill pill-' + ${rentInfo.rentalStatuses.lowercaseName}"
+                                  th:text="${rentInfo.rentalStatuses.nameCapitalized}"></span>
+                            <span class="badge bg-success" th:text="${rentInfo.totalCost + ' $'}"></span>
+                        </div>
+
+                        <!-- Dates: Created, Updated, Start, End -->
+                        <small class="text-muted d-block mb-1">
+                            <i class="bi bi-calendar2-event me-1"></i>
+                            Created: <span th:text="${rentInfo.formattedCreatedAt}"></span>
+                            &nbsp;|&nbsp;
+                            Updated: <span th:text="${rentInfo.formattedUpdatedAt}"></span>
+                        </small>
+                        <small class="text-muted d-block">
+                            <i class="bi bi-calendar2-fill me-1"></i>
+                            Start: <span th:text="${rentInfo.startDateFormated}"></span>
+                            &nbsp;|&nbsp;
+                            End: <span th:text="${rentInfo.endDateFormated}"></span>
+                        </small>
+                    </div>
+
+                    <!-- View Rental Button -->
+                    <div class="d-flex flex-column justify-content-around">
+                        <a class="btn btn-primary btn-sm align-self-center"
+                           th:href="@{/viewRental(id=${rentInfo.id})}">
+                            <i class="bi bi-eye-fill"></i> View
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State (if no rentals found) -->
+            <div class="text-center py-5" th:if="${#lists.isEmpty(page.content)}">
+                <p class="fs-4 text-muted">No rentals found</p>
+            </div>
+
+            <!-- Pagination Controls -->
+            <nav class="mt-4" th:if="${page.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${page.pageNumber == 0} ? 'disabled'">
+                        <button class="page-link" th:onclick="|goToPage(${page.pageNumber - 1})|">Previous</button>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                          Page <span th:text="${page.pageNumber + 1}"></span> of <span
+                                th:text="${page.totalPages}"></span>
+                        </span>
+                    </li>
+                    <li class="page-item" th:classappend="${page.pageNumber + 1 >= page.totalPages} ? 'disabled'">
+                        <button class="page-link" th:onclick="|goToPage(${page.pageNumber + 1})|">Next</button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+</body>
+
+<!-- Include common scripts (filters) -->
+<script src="/filters.js"></script>
+
+<script>
+    // Configuration for search fields used in common code
+    searchFields = [
+        {id: 'rentalIdSearch', param: 'rentalId'},
+        {id: 'carPlateNumberSearch', param: 'carPlateNumber'},
+        {id: 'clientLastNameSearch', param: 'clientLastName'},
+        {id: 'statusSelect', param: 'statusId'},
+        {id: 'sortBySelect', param: 'sortBy'}
+    ];
+
+    // Function to gather search parameters with additional validation (e.g., for rentalId > 0)
+    // Used in common code
+    function getCustomSearchParams() {
+        const params = getSearchParams(searchFields);
+        const rentalId = params.get('rentalId');
+
+        if (rentalId && parseInt(rentalId) <= 0) {
+            params.delete('rentalId');  // Remove invalid rentalId
+        }
+        return params;
+    }
+
+    // Update rental status filter
+    function updateFilterByRentalStatus(selectElement) {
+        updateFilter(selectElement, 'statusId', true);
+    }
+
+    // Add "Enter" key event for search fields
+    const searchInputs = document.querySelectorAll('#rentalIdSearch, #carPlateNumberSearch, #clientLastNameSearch');
+    handleEnterKeyForSearch(searchInputs);
+</script>
+
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE HTML>
+<html data-bs-theme="dark" lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='Error')}"></head>
+<body class="bg-dark text-light">
+
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<div class="container mt-5">
+    <div class="text-center">
+        <!-- Помилковий код (наприклад, 500, 403 тощо) -->
+        <h1 class="display-4" th:text="${errorCode}">Error Code</h1>
+        <!-- Заголовок або повідомлення про помилку -->
+        <h2 class="mb-3" th:text="${errorMSG}">An error occurred</h2>
+        <p class="lead">
+            We're sorry, there was an unexpected error. Please try again later or go to the main page.
+        </p>
+        <a class="btn btn-primary btn-lg" href="/">Back to the main page</a>
+    </div>
+</div>
+</body>
+</html>

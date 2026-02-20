@@ -1,0 +1,150 @@
+<!DOCTYPE HTML>
+<html data-bs-theme="dark" lang="uk">
+<head th:replace="~{fragments/headers::head(title='Edit Car')}">Edit Car</head>
+<body class="bg-dark text-light">
+
+<!-- Navigation Bar -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<!-- Main Container -->
+<div class="container-lg my-5">
+    <div class="row justify-content-center">
+        <div class="col-11 col-md-7 col-lg-5">
+
+            <!-- Card to display car management form -->
+            <div class="card bg-body-tertiary bg-opacity-25 border-0 shadow-lg rounded-4">
+
+                <!-- Card Header (Title and Edit Button) -->
+                <div class="card-header bg-primary text-light d-flex justify-content-between align-items-center">
+                    <h2 class="mb-0">
+                        <i class="bi bi-car-front-fill me-2"></i> Car Management
+                    </h2>
+                    <!-- Button to toggle editing mode -->
+                    <button class="btn btn-sm btn-outline-light" id="toggleEditBtn" title="Enable Editing"
+                            type="button">
+                        <i class="bi bi-pencil-square"></i>
+                    </button>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-tabs nav-fill mt-3 mx-3" id="carTabs" role="tablist">
+                    <!-- Tab for Editing Car -->
+                    <li class="nav-item" role="presentation">
+                        <button aria-controls="edit" aria-selected="true" class="nav-link active" data-bs-target="#edit"
+                                data-bs-toggle="tab" id="edit-tab" role="tab" type="button">
+                            <i class="bi bi-pencil-square me-1"></i> Edit Car
+                        </button>
+                    </li>
+                    <!-- Tab for Reporting Issue -->
+                    <li class="nav-item" role="presentation">
+                        <button aria-controls="report" aria-selected="false" class="nav-link" data-bs-target="#report"
+                                data-bs-toggle="tab" id="report-tab" role="tab" type="button">
+                            <i class="bi bi-exclamation-triangle me-1"></i> Report Issue
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Tab Content -->
+                <div class="tab-content p-4">
+                    <!-- Edit Car Tab (form for editing car details) -->
+                    <div aria-labelledby="edit-tab" class="tab-pane fade show active" id="edit" role="tabpanel">
+                        <form class="row g-3" id="editCarForm" method="POST" th:action="@{/updateCar}"
+                              th:object="${car}">
+                            <!-- Hidden Field for Car ID -->
+                            <input th:field="*{id}" type="hidden"/>
+
+                            <!-- Car Model Dropdown -->
+                            <div th:replace="~{fragments/formField :: form-select-object(model, 'Car model:', allCarModels, getCarModelInfo, 'col-12')}"></div>
+                            <!-- Plate Number Input Field -->
+                            <div th:replace="~{fragments/formField :: form-Field-generic(plateNumber, 'Plate number', 'col-12')}"></div>
+                            <!-- Color Input Field -->
+                            <div th:replace="~{fragments/formField :: form-Field-generic(color, 'Color', 'col-12')}"></div>
+                            <!-- Car Status Dropdown -->
+                            <div th:replace="~{fragments/formField :: form-select-object(carStatuses, 'Status:', statusTypes, getCarStatusName, 'col-12')}"></div>
+
+                            <!-- Submit Button to Save Changes -->
+                            <div class="col-12 d-flex justify-content-center gap-3 mt-2">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-check-circle me-1"></i> Save
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Report Issue Tab (form for reporting issues) -->
+                    <div aria-labelledby="report-tab" class="tab-pane fade" id="report" role="tabpanel">
+                        <form class="row g-3" method="post" th:action="@{/reportIssue}">
+                            <!-- Hidden field for edit context -->
+                            <input name="edit" type="hidden" value="1"/>
+                            <!-- Hidden field for car ID -->
+                            <input name="carId" th:value="${car.id}" type="hidden"/>
+                            <!-- Textarea for Issue Description -->
+                            <div class="col-12">
+                                <label class="form-label" for="message">Describe the issue:</label>
+                                <textarea class="form-control" id="message" name="message"
+                                          placeholder="Enter issue description…"
+                                          required rows="3"></textarea>
+                            </div>
+                            <!-- Submit Button for Issue Report -->
+                            <div class="col-12 text-end">
+                                <button class="btn btn-warning" type="submit">
+                                    <i class="bi bi-envelope-send me-1"></i> Submit Report
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Footer with Back to List Link -->
+                <div class="card-footer bg-transparent text-center">
+                    <small class="text-muted">
+                        <a class="link-primary" href="/cars">Back to list</a>
+                    </small>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- Script to Enable/Disable Form Fields on Toggle -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const toggleBtn = document.getElementById("toggleEditBtn");
+
+        // Select form input fields and select dropdowns
+        const inputs = document.querySelectorAll('#editCarForm input:not([type="hidden"]), #editCarForm textarea');
+        const selects = document.querySelectorAll('#editCarForm select');
+
+        // Initially disable fields (make them read-only)
+        inputs.forEach(input => input.readOnly = true);
+        selects.forEach(select => {
+            if (select.tomselect) {
+                select.tomselect.disable(); // Disable TomSelect if present
+            }
+        });
+
+        // Add event listener to toggle edit mode
+        toggleBtn.addEventListener("click", function () {
+            const editingEnabled = toggleBtn.classList.contains("btn-success");
+
+            // Enable/Disable form fields based on editing state
+            inputs.forEach(input => input.readOnly = editingEnabled);
+            selects.forEach(select => {
+                if (select.tomselect) {
+                    editingEnabled ? select.tomselect.disable() : select.tomselect.enable();
+                }
+            });
+
+            // Toggle button styles and icon
+            toggleBtn.classList.toggle("btn-success", !editingEnabled);
+            toggleBtn.classList.toggle("btn-outline-light", editingEnabled);
+            toggleBtn.innerHTML = editingEnabled
+                ? '<i class="bi bi-pencil-square"></i>'
+                : '<i class="bi bi-unlock-fill"></i>';
+        });
+    });
+</script>
+
+</body>
+</html>

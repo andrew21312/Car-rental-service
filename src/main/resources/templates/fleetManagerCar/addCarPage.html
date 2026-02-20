@@ -1,0 +1,57 @@
+<!DOCTYPE HTML>
+<html data-bs-theme="dark" lang="uk">
+<head th:replace="~{fragments/headers::head(title='Add Car')}">Add a car</head>
+<body class="bg-dark text-light">
+<!-- Navigation Bar (using a reusable fragment from the main page) -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<!-- Main container to center and style the content -->
+<div class="container-lg my-5">
+    <!-- Centering the content within a row -->
+    <div class="row justify-content-center">
+        <div class="col-11 col-md-7 col-lg-5">
+            <!-- Card container with shadow and rounded corners -->
+            <div class="card bg-body-tertiary bg-opacity-25 border-0 shadow-lg rounded-4">
+
+                <!-- Card Header with title and icon -->
+                <div class="card-header bg-primary text-light text-center">
+                    <h2 class="mb-0"><i class="bi bi-car-front-fill me-1"></i> Add a car</h2>
+                </div>
+
+                <!-- Card Body containing the form for adding a car -->
+                <div class="card-body p-4">
+                    <!-- Form that will submit data to '/addCar' with POST method -->
+                    <form class="row g-3" method="POST" th:action="@{/addCar}" th:object="${car}">
+
+                        <!-- Car model selection field, using a fragment for object-based field rendering -->
+                        <div th:replace="~{fragments/formField :: form-select-object(model, 'Car model:', allCarModels, getCarModelInfo, 'col-12')}"></div>
+
+                        <!-- Plate number input field, using a generic form field fragment -->
+                        <div th:replace="~{fragments/formField :: form-Field-generic(plateNumber, 'Plate number', 'col-12')}"></div>
+
+                        <!-- Color input field, using a generic form field fragment -->
+                        <div th:replace="~{fragments/formField :: form-Field-generic(color, 'Color', 'col-12')}"></div>
+
+                        <!-- Car status selection field, using a fragment for object-based field rendering -->
+                        <div th:replace="~{fragments/formField :: form-select-object(carStatuses, 'Status:', statusTypes, getCarStatusName, 'col-12')}"></div>
+
+                        <!-- Submit button for the form -->
+                        <div class="col-12 d-flex justify-content-center gap-3 mt-3">
+                            <button class="btn btn-success" type="submit">
+                                <i class="bi bi-check-circle me-1"></i> Add
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Card Footer with a link to return to the list of cars -->
+                <div class="card-footer bg-transparent text-center">
+                    <small class="text-muted"><a class="link-primary" href="/cars">Back to list</a></small>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
