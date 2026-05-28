@@ -209,4 +209,5 @@ class UserServiceImplTest {
         assertEquals(expectedPage, result);
         verify(userDAO).getUsersPage(null, null, "test", null, 0, 15, "username");
     }
+    //
 }
