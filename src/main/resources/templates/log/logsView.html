@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='Logs')}">Logs</head>
+<body class="bg-dark text-light">
+
+<!-- Navigation Bar -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<!-- Main Content Area -->
+<div class="container my-5">
+    <!-- Page Title -->
+    <h2 class="display-6 text-center mb-4">Audit Logs</h2>
+
+    <!-- Search Bar Section -->
+    <div class="d-flex flex-wrap justify-content-center gap-2 mb-4">
+        <form class="d-flex" method="get" onsubmit="updateSearchQuery()">
+            <!-- Search Input Group -->
+            <div class="input-group input-group-sm w-auto">
+                <input class="form-control"
+                       id="searchQuery"
+                       name="q"
+                       placeholder="Search query"
+                       th:value="${searchQuery}"
+                       type="text"/>
+                <button class="btn btn-outline-light" type="submit">
+                    <i class="bi bi-search"></i>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Table Displaying Logs -->
+    <table class="table table-sm table-hover text-light align-middle"
+           style="background-color: #1e1e2f; border-radius: 10px;"
+           th:if="${!page.content.isEmpty()}">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Date</th>
+            <th>User</th>
+            <th>Type</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+        <!-- Loop through log entries and display each log -->
+        <tr th:each="log : ${page.content}">
+            <td th:text="${log.logId}"></td>
+            <td>
+                <div class="small" th:text="${#dates.format(log.logCreatedAt, 'yyyy-MM-dd')}"></div>
+                <div class="text-muted small" th:text="${#dates.format(log.logCreatedAt, 'HH:mm:ss')}"></div>
+            </td>
+            <td th:text="${log.userId}"></td>
+            <td>
+                <span class="badge" th:classappend="${log.eventType.getCategory()}"
+                      th:text="${log.eventType.getCapitalizedName()}"></span>
+            </td>
+            <td>
+            <span th:text="${#strings.abbreviate(log.logText, 50)}"
+                  th:title="${log.logText}"></span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <!-- Empty State when no logs are found -->
+    <div class="text-center py-5" th:if="${#lists.isEmpty(page.content)}">
+        <p class="fs-4 text-muted">No logs found</p>
+    </div>
+
+    <!-- Pagination for the Logs Table -->
+    <nav th:if="${page.totalPages > 1}">
+        <ul class="pagination justify-content-center">
+            <!-- Previous Page Button (disabled if on the first page) -->
+            <li class="page-item" th:classappend="${page.pageNumber == 0} ? 'disabled'">
+                <a class="page-link"
+                   th:href="@{/logs(page=${page.pageNumber - 1}, size=${page.pageSize})}">Попередня</a>
+            </li>
+            <!-- Current Page Indicator -->
+            <li class="page-item disabled">
+                <span class="page-link">Сторінка <span th:text="${page.pageNumber + 1}"></span> з <span
+                        th:text="${page.totalPages}"></span></span>
+            </li>
+            <!-- Next Page Button (disabled if on the last page) -->
+            <li class="page-item" th:classappend="${page.pageNumber + 1 >= page.totalPages} ? 'disabled'">
+                <a class="page-link" th:href="@{/logs(page=${page.pageNumber + 1}, size=${page.pageSize})}">Наступна</a>
+            </li>
+        </ul>
+    </nav>
+</div>
+</body>
+
+<!-- JavaScript to Update Search Query in URL -->
+<script>
+    /**
+     * Updates the search query in the URL when the user submits the search form.
+     * It appends or removes the 'q' query parameter based on the user's input.
+     *
+     * @returns {void} - The function redirects the page with the updated search query in the URL.
+     */
+    function updateSearchQuery() {
+        // Get the search query value from the input field
+        const searchQuery = document.getElementById('searchQuery').value;
+
+        // Create a new URL object based on the current location
+        const url = new URL(window.location);
+
+        // If the search query is not empty, set it as a query parameter, otherwise remove it
+        if (searchQuery) {
+            url.searchParams.set('q', searchQuery);
+        } else {
+            url.searchParams.delete('q');
+        }
+
+        // Redirect to the updated URL with the new search query
+        window.location.href = url.toString();
+    }
+</script>
+
+</html>

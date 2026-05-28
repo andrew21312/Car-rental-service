@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='User Profile')}"></head>
+<body class="bg-dark text-light">
+
+<!-- Navigation Bar -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<div class="container my-5">
+    <!-- Card for displaying user profile -->
+    <div class="card bg-body-tertiary border-0 shadow-lg mx-auto" style="max-width: 500px;">
+
+        <!-- Card Header with Title -->
+        <div class="card-header bg-primary text-light text-center">
+            <h2 class="mb-0"><i class="bi bi-person-circle me-1"></i>Profile Information</h2>
+        </div>
+
+        <!-- Card Body for Profile View and Edit Forms -->
+        <div class="card-body p-4">
+
+            <!-- View Mode: Displays User's Profile Information -->
+            <div class="mb-4" id="profileView">
+                <dl class="row mb-4">
+                    <dt class="col-5 text-muted">Username:</dt>
+                    <dd class="col-7" th:text="${user.username}">username</dd>
+
+                    <dt class="col-5 text-muted">First Name:</dt>
+                    <dd class="col-7" th:text="${user.firstName}">First</dd>
+
+                    <dt class="col-5 text-muted">Last Name:</dt>
+                    <dd class="col-7" th:text="${user.lastName}">Last</dd>
+
+                    <dt class="col-5 text-muted">Phone:</dt>
+                    <dd class="col-7" th:text="${user.phoneNumber}">+380...</dd>
+                </dl>
+
+                <!-- Button to toggle Edit Profile form -->
+                <button aria-expanded="true"
+                        class="btn btn-outline-light w-100"
+                        data-bs-target="#profileEdit"
+                        data-bs-toggle="collapse"
+                        type="button">
+                    <i class="bi bi-pencil-square me-1"></i> Edit Profile
+                </button>
+            </div>
+
+            <!-- Divider -->
+            <hr class="border-light opacity-25">
+
+            <!-- Edit Mode: Collapsed Form to Edit User's Profile -->
+            <div class="collapse" id="profileEdit">
+                <form class="row gx-3 gy-3" method="POST" th:action="@{/updateProfile}" th:object="${user}">
+                    <!-- Username Field -->
+                    <div th:replace="~{fragments/formField :: form-Field-generic(username, 'Username','col-6')}"></div>
+
+                    <!-- First Name Field -->
+                    <div th:replace="~{fragments/formField :: form-Field-generic(firstName, 'First name','col-6')}"></div>
+
+                    <!-- Phone Number Field -->
+                    <div th:replace="~{fragments/formField :: form-Field-generic(phoneNumber, 'Phone number','col-6')}"></div>
+
+                    <!-- Last Name Field -->
+                    <div th:replace="~{fragments/formField :: form-Field-generic(lastName, 'Last name','col-6')}"></div>
+
+                    <!-- Buttons to Submit or Cancel Edit -->
+                    <div class="col-12 d-flex justify-content-between mt-3">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-check-circle me-1"></i> Update
+                        </button>
+                        <button aria-expanded="false" class="btn btn-secondary"
+                                data-bs-target="#profileEdit"
+                                data-bs-toggle="collapse"
+                                type="button">
+                            <i class="bi bi-x-circle me-1"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+                <!-- Divider for Edit Mode -->
+                <hr class="border-light opacity-25 my-4">
+            </div>
+
+            <!-- Change Password Section: Button to Trigger Password Change Form -->
+            <button aria-expanded="false" class="btn btn-outline-warning w-100 mb-3"
+                    data-bs-target="#passwordForm"
+                    data-bs-toggle="collapse"
+                    type="button">
+                <i class="bi bi-key me-1"></i> Change Password
+            </button>
+
+            <!-- Password Change Form (Collapsed initially) -->
+            <div class="collapse" id="passwordForm">
+                <form class="row gx-3 gy-3" method="POST" th:action="@{/updateUserPassword}" th:object="${password}">
+                    <!-- Old Password Field -->
+                    <div
+                            th:replace="~{fragments/formField :: form-Field-generic(oldPassword, 'Old password', 'col-12')}"></div>
+
+                    <!-- New Password Field -->
+                    <div
+                            th:replace="~{fragments/formField :: form-Field-generic(newPassword, 'New password', 'col-12')}"></div>
+
+                    <!-- Confirm Password Field -->
+                    <div
+                            th:replace="~{fragments/formField :: form-Field-generic(confirmPassword, 'Confirm password', 'col-12')}"></div>
+
+                    <!-- Buttons to Submit or Cancel Password Change -->
+                    <div class="col-12 d-flex justify-content-between mt-3">
+                        <button class="btn btn-primary" type="submit">
+                            <i class="bi bi-check-circle me-1"></i> Update Password
+                        </button>
+                        <button aria-expanded="false" class="btn btn-secondary"
+                                data-bs-target="#passwordForm"
+                                data-bs-toggle="collapse"
+                                type="button">
+                            <i class="bi bi-x-circle me-1"></i> Cancel
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>
