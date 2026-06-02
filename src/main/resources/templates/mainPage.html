@@ -129,6 +129,98 @@
     </div>
 </nav>
 
+<!-- Filters -->
+<div class="container mt-4">
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-4 mb-4 col-9 mx-auto">
+
+        <!-- Filter Card -->
+        <div class="card shadow-sm w-100">
+            <div class="card-body">
+                <div class="row g-3">
+
+<!--                    &lt;!&ndash; Engine Type &ndash;&gt;-->
+<!--                    <div class="col-md-3">-->
+<!--                        <label class="form-label" for="engineType">-->
+<!--                            <i class="bi bi-car-front"></i> Engine Type-->
+<!--                        </label>-->
+<!--                        <select class="form-select form-select-sm" id="engineType"-->
+<!--                                onchange="updateEngineTypeFilter(this)">-->
+<!--                            <option value="">All Engines</option>-->
+<!--                            <option th:each="e : ${engineTypes}"-->
+<!--                                    th:selected="${e.name == engineType}"-->
+<!--                                    th:text="${e.getCapitalizedName()}"-->
+<!--                                    th:value="${e.name}">-->
+<!--                            </option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+
+<!--                    &lt;!&ndash; Seats &ndash;&gt;-->
+<!--                    <div class="col-md-3">-->
+<!--                        <label class="form-label" for="seats">-->
+<!--                            <i class="bi bi-person-lines-fill"></i> Seats-->
+<!--                        </label>-->
+<!--                        <select class="form-select form-select-sm" id="seats" onchange="updateSeatsFilter(this)">-->
+<!--                            <option value="">Number of seats</option>-->
+<!--                            <option th:each="s : ${seatsTypes}"-->
+<!--                                    th:selected="${s == seats}"-->
+<!--                                    th:text="${s}"-->
+<!--                                    th:value="${s}">-->
+<!--                            </option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+
+<!--                    &lt;!&ndash; Results per Page &ndash;&gt;-->
+<!--                    <div class="col-md-3">-->
+<!--                        <label class="form-label" for="pageSizeSelect">-->
+<!--                            <i class="bi bi-file-earmark-text"></i> Results per Page-->
+<!--                        </label>-->
+<!--                        <div class="input-group input-group-sm">-->
+<!--                            <select class="form-select form-select-sm" id="pageSizeSelect"-->
+<!--                                    onchange="updatePageSize(this)">-->
+<!--                                <option th:selected="${page.pageSize == 4}" value="4">4</option>-->
+<!--                                <option th:selected="${page.pageSize == 8}" value="8">8</option>-->
+<!--                                <option th:selected="${page.pageSize == 12}" value="12">12</option>-->
+<!--                                <option th:selected="${page.pageSize == 16}" value="16">16</option>-->
+<!--                                <option th:selected="${page.pageSize == 20}" value="20">20</option>-->
+<!--                            </select>-->
+<!--                        </div>-->
+<!--                    </div>-->
+
+<!--                    &lt;!&ndash; Sort By &ndash;&gt;-->
+<!--                    <div class="col-md-3">-->
+<!--                        <label class="form-label" for="sortBySelect">-->
+<!--                            <i class="bi bi-sort-up"></i> Sort By-->
+<!--                        </label>-->
+<!--                        <select class="form-select form-select-sm" id="sortBySelect" onchange="updateSort(this)"-->
+<!--                                th:name="sortBy">-->
+<!--                            <option th:selected="${sortBy == 'priceDesc'}" value="priceDesc">Price ↓</option>-->
+<!--                            <option th:selected="${sortBy == 'priceAsc'}" value="priceAsc">Price ↑</option>-->
+<!--                            <option th:selected="${sortBy == 'yearDesc'}" value="yearDesc">Year ↓</option>-->
+<!--                            <option th:selected="${sortBy == 'yearAsc'}" value="yearAsc">Year ↑</option>-->
+<!--                        </select>-->
+<!--                    </div>-->
+
+                    <!-- Search -->
+                    <div class="col-md-12">
+                        <label class="form-label" for="modelQuery">
+                            <i class="bi bi-search"></i> Search by Model
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <input class="form-control form-control-sm" id="modelQuery"
+                                   placeholder="Search by model name" th:value="${modelQuery}" type="text">
+                            <button class="btn btn-outline-light btn-sm" onclick="buildSearchUrl()" type="button">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <!-- Car Models Grid -->
 <div class="container-lg my-4">
     <div class="row g-4">
@@ -157,10 +249,10 @@
                             <span class="text-success">$</span>
                             <span th:text="${model.price}">100</span> <span class="text-muted">/day</span>
                         </p>
-                        <!--                        <a class="btn btn-primary btn-sm w-100 shadow rounded-3"-->
-                        <!--                           th:href="@{/carDetails/{id}(id=${model.id})}">-->
-                        <!--                            <i class="bi bi-info-circle me-1"></i> Details-->
-                        <!--                        </a>-->
+                        <a class="btn btn-primary btn-sm w-100 shadow rounded-3"
+                           th:href="@{/carDetails/{id}(id=${model.id})}">
+                            <i class="bi bi-info-circle me-1"></i> Details
+                        </a>
                     </div>
                 </div>
             </div>
@@ -169,7 +261,7 @@
 </div>
 <!-- Empty State -->
 <div class="text-center py-5" th:if="${#lists.isEmpty(page.content)}">
-    <p class="fs-4 text-muted">No car models found</p>
+    <p class="fs-4 text-muted">No vehicles found</p>
 </div>
 
 <!-- Pagination -->
