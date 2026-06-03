@@ -138,55 +138,55 @@
             <div class="card-body">
                 <div class="row g-3">
 
-<!--                    &lt;!&ndash; Engine Type &ndash;&gt;-->
-<!--                    <div class="col-md-3">-->
-<!--                        <label class="form-label" for="engineType">-->
-<!--                            <i class="bi bi-car-front"></i> Engine Type-->
-<!--                        </label>-->
-<!--                        <select class="form-select form-select-sm" id="engineType"-->
-<!--                                onchange="updateEngineTypeFilter(this)">-->
-<!--                            <option value="">All Engines</option>-->
-<!--                            <option th:each="e : ${engineTypes}"-->
-<!--                                    th:selected="${e.name == engineType}"-->
-<!--                                    th:text="${e.getCapitalizedName()}"-->
-<!--                                    th:value="${e.name}">-->
-<!--                            </option>-->
-<!--                        </select>-->
-<!--                    </div>-->
+                    <!-- Engine Type -->
+                    <div class="col-md-3">
+                        <label class="form-label" for="engineType">
+                            <i class="bi bi-car-front"></i> Engine Type
+                        </label>
+                        <select class="form-select form-select-sm" id="engineType"
+                                onchange="updateEngineTypeFilter(this)">
+                            <option value="">All Engines</option>
+                            <option th:each="e : ${engineTypes}"
+                                    th:selected="${e.name == engineType}"
+                                    th:text="${e.getCapitalizedName()}"
+                                    th:value="${e.name}">
+                            </option>
+                        </select>
+                    </div>
 
-<!--                    &lt;!&ndash; Seats &ndash;&gt;-->
-<!--                    <div class="col-md-3">-->
-<!--                        <label class="form-label" for="seats">-->
-<!--                            <i class="bi bi-person-lines-fill"></i> Seats-->
-<!--                        </label>-->
-<!--                        <select class="form-select form-select-sm" id="seats" onchange="updateSeatsFilter(this)">-->
-<!--                            <option value="">Number of seats</option>-->
-<!--                            <option th:each="s : ${seatsTypes}"-->
-<!--                                    th:selected="${s == seats}"-->
-<!--                                    th:text="${s}"-->
-<!--                                    th:value="${s}">-->
-<!--                            </option>-->
-<!--                        </select>-->
-<!--                    </div>-->
+                    <!-- Seats -->
+                    <div class="col-md-3">
+                        <label class="form-label" for="seats">
+                            <i class="bi bi-person-lines-fill"></i> Seats
+                        </label>
+                        <select class="form-select form-select-sm" id="seats" onchange="updateSeatsFilter(this)">
+                            <option value="">Number of seats</option>
+                            <option th:each="s : ${seatsTypes}"
+                                    th:selected="${s == seats}"
+                                    th:text="${s}"
+                                    th:value="${s}">
+                            </option>
+                        </select>
+                    </div>
 
-<!--                    &lt;!&ndash; Results per Page &ndash;&gt;-->
-<!--                    <div class="col-md-3">-->
-<!--                        <label class="form-label" for="pageSizeSelect">-->
-<!--                            <i class="bi bi-file-earmark-text"></i> Results per Page-->
-<!--                        </label>-->
-<!--                        <div class="input-group input-group-sm">-->
-<!--                            <select class="form-select form-select-sm" id="pageSizeSelect"-->
-<!--                                    onchange="updatePageSize(this)">-->
-<!--                                <option th:selected="${page.pageSize == 4}" value="4">4</option>-->
-<!--                                <option th:selected="${page.pageSize == 8}" value="8">8</option>-->
-<!--                                <option th:selected="${page.pageSize == 12}" value="12">12</option>-->
-<!--                                <option th:selected="${page.pageSize == 16}" value="16">16</option>-->
-<!--                                <option th:selected="${page.pageSize == 20}" value="20">20</option>-->
-<!--                            </select>-->
-<!--                        </div>-->
-<!--                    </div>-->
+                    <!-- Results per Page -->
+                    <div class="col-md-3">
+                        <label class="form-label" for="pageSizeSelect">
+                            <i class="bi bi-file-earmark-text"></i> Results per Page
+                        </label>
+                        <div class="input-group input-group-sm">
+                            <select class="form-select form-select-sm" id="pageSizeSelect"
+                                    onchange="updatePageSize(this)">
+                                <option th:selected="${page.pageSize == 4}" value="4">4</option>
+                                <option th:selected="${page.pageSize == 8}" value="8">8</option>
+                                <option th:selected="${page.pageSize == 12}" value="12">12</option>
+                                <option th:selected="${page.pageSize == 16}" value="16">16</option>
+                                <option th:selected="${page.pageSize == 20}" value="20">20</option>
+                            </select>
+                        </div>
+                    </div>
 
-<!--                    &lt;!&ndash; Sort By &ndash;&gt;-->
+                    <!-- Sort By -->
 <!--                    <div class="col-md-3">-->
 <!--                        <label class="form-label" for="sortBySelect">-->
 <!--                            <i class="bi bi-sort-up"></i> Sort By-->
