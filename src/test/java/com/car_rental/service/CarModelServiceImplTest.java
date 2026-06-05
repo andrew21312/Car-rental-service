@@ -128,4 +128,60 @@ class CarModelServiceImplTest {
                 )
         );
     }
+    @Test
+    void getCarModelsPage_ShouldFilterByModelId() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelDAO.getCarModelsPage(
+                null, 3, null, null, 0, 10, "modelIdAsc"
+        )).thenReturn(pageResult);
+
+        PageResult<CarModel> result = service.getCarModelsPage(
+                null, 3, null, null, 0, 10, "modelIdAsc"
+        );
+
+        assertEquals(pageResult, result);
+
+        verify(carModelDAO).getCarModelsPage(
+                null, 3, null, null, 0, 10, "modelIdAsc"
+        );
+    }
+
+    @Test
+    void getCarModelsPage_ShouldFilterByEngineTypeAndModelId() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelDAO.getCarModelsPage(
+                "ELECTRIC", 4, null, null, 0, 10, "modelIdAsc"
+        )).thenReturn(pageResult);
+
+        PageResult<CarModel> result = service.getCarModelsPage(
+                "ELECTRIC", 4, null, null, 0, 10, "modelIdAsc"
+        );
+
+        assertEquals(pageResult, result);
+
+        verify(carModelDAO).getCarModelsPage(
+                "ELECTRIC", 4, null, null, 0, 10, "modelIdAsc"
+        );
+    }
+
+    @Test
+    void getCarModelsPage_ShouldFilterByAllAvailableCriteria() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelDAO.getCarModelsPage(
+                "HYBRID", 2, "Prius", 5, 1, 10, "modelIdAsc"
+        )).thenReturn(pageResult);
+
+        PageResult<CarModel> result = service.getCarModelsPage(
+                "HYBRID", 2, "Prius", 5, 1, 10, "modelIdAsc"
+        );
+
+        assertEquals(pageResult, result);
+
+        verify(carModelDAO).getCarModelsPage(
+                "HYBRID", 2, "Prius", 5, 1, 10, "modelIdAsc"
+        );
+    }
 }

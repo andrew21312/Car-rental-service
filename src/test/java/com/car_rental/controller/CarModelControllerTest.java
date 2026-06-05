@@ -130,4 +130,67 @@ class CarModelControllerTest {
         verify(model).addAttribute(PAGE, emptyPage);
         verify(model).addAttribute("modelNameSearch", "UnknownModel");
     }
+    @Test
+    void getAllCarModels_ShouldFilterByModelId() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                null, 3, null, null, 0, 10, "modelIdAsc"
+        )).thenReturn(pageResult);
+
+        String result = controller.getAllCarModels(
+                null, 3, null, null, 0, 10, "modelIdAsc",
+                model, redirectAttributes
+        );
+
+        assertEquals("fleetManagerCarModel/carModelsPage", result);
+
+        verify(carModelService).getCarModelsPage(
+                null, 3, null, null, 0, 10, "modelIdAsc"
+        );
+        verify(model).addAttribute("modelIdSearch", 3);
+    }
+
+    @Test
+    void getAllCarModels_ShouldFilterByEngineTypeAndModelId() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                "ELECTRIC", 4, null, null, 0, 10, "modelIdAsc"
+        )).thenReturn(pageResult);
+
+        String result = controller.getAllCarModels(
+                "ELECTRIC", 4, null, null, 0, 10, "modelIdAsc",
+                model, redirectAttributes
+        );
+
+        assertEquals("fleetManagerCarModel/carModelsPage", result);
+
+        verify(carModelService).getCarModelsPage(
+                "ELECTRIC", 4, null, null, 0, 10, "modelIdAsc"
+        );
+        verify(model).addAttribute("engineType", "ELECTRIC");
+        verify(model).addAttribute("modelIdSearch", 4);
+    }
+
+    @Test
+    void getAllCarModels_ShouldKeepFilterValuesInModel() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                "HYBRID", 2, "Prius", 5, 1, 10, "modelIdAsc"
+        )).thenReturn(pageResult);
+
+        String result = controller.getAllCarModels(
+                "HYBRID", 2, "Prius", 5, 1, 10, "modelIdAsc",
+                model, redirectAttributes
+        );
+
+        assertEquals("fleetManagerCarModel/carModelsPage", result);
+
+        verify(model).addAttribute("modelIdSearch", 2);
+        verify(model).addAttribute("modelNameSearch", "Prius");
+        verify(model).addAttribute("engineType", "HYBRID");
+        verify(model).addAttribute("seats", 5);
+    }
 }
