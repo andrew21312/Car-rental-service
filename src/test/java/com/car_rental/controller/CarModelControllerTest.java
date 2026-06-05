@@ -193,4 +193,61 @@ class CarModelControllerTest {
         verify(model).addAttribute("engineType", "HYBRID");
         verify(model).addAttribute("seats", 5);
     }
+    @Test
+    void getAllCarModels_ShouldSortByPriceAscending() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                null, null, null, null, 0, 10, "priceAsc"
+        )).thenReturn(pageResult);
+
+        String result = controller.getAllCarModels(
+                null, null, null, null, 0, 10, "priceAsc",
+                model, redirectAttributes
+        );
+
+        assertEquals("fleetManagerCarModel/carModelsPage", result);
+
+        verify(carModelService).getCarModelsPage(
+                null, null, null, null, 0, 10, "priceAsc"
+        );
+        verify(model).addAttribute("sortBy", "priceAsc");
+    }
+
+    @Test
+    void getAllCarModels_ShouldSortByPriceDescending() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                null, null, null, null, 0, 10, "priceDesc"
+        )).thenReturn(pageResult);
+
+        controller.getAllCarModels(
+                null, null, null, null, 0, 10, "priceDesc",
+                model, redirectAttributes
+        );
+
+        verify(carModelService).getCarModelsPage(
+                null, null, null, null, 0, 10, "priceDesc"
+        );
+        verify(model).addAttribute("sortBy", "priceDesc");
+    }
+
+    @Test
+    void getAllCarModels_ShouldSortTogetherWithFilters() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                "HYBRID", null, "Prius", 5, 0, 10, "priceAsc"
+        )).thenReturn(pageResult);
+
+        controller.getAllCarModels(
+                "HYBRID", null, "Prius", 5, 0, 10, "priceAsc",
+                model, redirectAttributes
+        );
+
+        verify(carModelService).getCarModelsPage(
+                "HYBRID", null, "Prius", 5, 0, 10, "priceAsc"
+        );
+    }
 }

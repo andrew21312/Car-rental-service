@@ -184,4 +184,60 @@ class CarModelServiceImplTest {
                 "HYBRID", 2, "Prius", 5, 1, 10, "modelIdAsc"
         );
     }
+    @Test
+    void getCarModelsPage_ShouldSortByPriceAscending() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelDAO.getCarModelsPage(
+                null, null, null, null, 0, 10, "priceAsc"
+        )).thenReturn(pageResult);
+
+        PageResult<CarModel> result = service.getCarModelsPage(
+                null, null, null, null, 0, 10, "priceAsc"
+        );
+
+        assertEquals(pageResult, result);
+
+        verify(carModelDAO).getCarModelsPage(
+                null, null, null, null, 0, 10, "priceAsc"
+        );
+    }
+
+    @Test
+    void getCarModelsPage_ShouldSortByPriceDescending() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelDAO.getCarModelsPage(
+                null, null, null, null, 0, 10, "priceDesc"
+        )).thenReturn(pageResult);
+
+        PageResult<CarModel> result = service.getCarModelsPage(
+                null, null, null, null, 0, 10, "priceDesc"
+        );
+
+        assertEquals(pageResult, result);
+
+        verify(carModelDAO).getCarModelsPage(
+                null, null, null, null, 0, 10, "priceDesc"
+        );
+    }
+
+    @Test
+    void getCarModelsPage_ShouldSortTogetherWithFilters() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelDAO.getCarModelsPage(
+                "HYBRID", 2, "Prius", 5, 0, 10, "priceAsc"
+        )).thenReturn(pageResult);
+
+        PageResult<CarModel> result = service.getCarModelsPage(
+                "HYBRID", 2, "Prius", 5, 0, 10, "priceAsc"
+        );
+
+        assertEquals(pageResult, result);
+
+        verify(carModelDAO).getCarModelsPage(
+                "HYBRID", 2, "Prius", 5, 0, 10, "priceAsc"
+        );
+    }
 }
