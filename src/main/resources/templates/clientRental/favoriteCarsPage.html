@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Популярні моделі</title>
+    <meta charset="UTF-8"/>
+</head>
+<body>
+
+<h2>За останній місяць</h2>
+
+<table border="1">
+    <thead>
+    <tr>
+        <th>Модель</th>
+        <th>Рік</th>
+        <th>Кількість оренд</th>
+        <th>Загально днів</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="carStat : ${favoriteCars}">
+        <td th:text="${carStat.modelName}">Model</td>
+        <td th:text="${carStat.year}">Year</td>
+        <td th:text="${carStat.rentalCount}">Rental Count</td>
+        <td th:text="${carStat.totalRentalDays}">Total Days</td>
+    </tr>
+
+    </tbody>
+</table>
+
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='Rental History')}"></head>
+<body class="bg-dark text-light">
+<!-- Navigation Bar -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<!-- Main Content Area -->
+<div class="container-lg my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+
+            <!-- Page Title -->
+            <h2 class="display-6 text-center mb-5">My Rental History</h2>
+
+            <!-- Empty State (No Rentals Found) -->
+            <div class="text-center py-5" th:if="${#lists.isEmpty(page.content)}">
+                <p class="fs-3 text-muted">No rentals found</p>
+            </div>
+
+            <!-- Rentals List -->
+            <div class="card bg-card border-0 mb-4 shadow-sm"
+                 th:each="rental : ${page.content}">
+                <div class="card-body d-flex flex-column flex-md-row justify-content-between gap-3">
+
+                    <!-- Rental Summary -->
+                    <div class="flex-grow-1">
+                        <h5 class="card-title text-light mb-1">
+                            #<span th:text="${rental.id}"></span>
+                            <small class="text-muted d-block"
+                                   th:text="${rental.carModelInfo + ' | ' + rental.plateNumber}"></small>
+                        </h5>
+
+                        <!-- Payment and Status Indicators -->
+                        <div class="d-flex flex-wrap gap-2 mb-2">
+                            <!-- Paid Status -->
+                            <span class="pill"
+                                  th:classappend="' pill-' + ${#strings.toLowerCase(rental.getPaymentStatus())}"
+                                  th:if="${rental.getPaymentStatus().name == 'PAID'}"
+                                  th:text="'Paid'"></span>
+
+                            <!-- Pending Payment Status -->
+                            <span class="pill"
+                                  th:classappend="' pill-' + ${#strings.toLowerCase(rental.getPaymentStatus())}"
+                                  th:if="${rental.getPaymentStatus().name == 'PENDING'}"
+                                  th:text="'Waiting for payment'"></span>
+
+                            <!-- Cancelled Status -->
+                            <span class="pill"
+                                  th:classappend="' pill-' + ${#strings.toLowerCase(rental.getPaymentStatus())}"
+                                  th:if="${rental.getPaymentStatus().name == 'CANCELLED'}"
+                                  th:text="'Cancelled'"></span>
+
+                            <!-- Rental Status -->
+                            <span th:class="'pill pill-' + ${#strings.toLowerCase(#strings.replace(rental.rentalStatuses.name,' ','_'))}"
+                                  th:text="${rental.rentalStatuses.getNameCapitalized()}"></span>
+
+                            <!-- Total Cost -->
+                            <span class="badge bg-success" th:text="${rental.totalCost + ' $'}"></span>
+                        </div>
+
+                        <!-- Rental Creation Date -->
+                        <small class="text-muted d-block mb-1">
+                            <i class="bi bi-calendar2-event me-1"></i>
+                            Created: <span th:text="${rental.getFormattedCreatedAt()}"></span>
+                        </small>
+                    </div>
+
+                    <!-- Rental Actions (Details and Cancel) -->
+                    <div class="d-flex flex-column justify-content-around">
+                        <!-- View Details Button (Collapsable) -->
+                        <button class="btn btn-outline-info fw-bold btn-sm mb-2" data-bs-toggle="collapse"
+                                th:attr="data-bs-target='#details__' + ${rental.id}" type="button">
+                            <i class="bi bi-info-circle"></i> Details
+                        </button>
+
+                        <!-- Cancel Rental Form (Conditionally displayed based on rental status) -->
+                        <form class="cancel-rental-form"
+                              method="post" th:action="@{/cancelRental}" th:if="${rental.rentalStatuses.name == 'PENDING'
+                                or rental.rentalStatuses.name == 'APPROVED'
+                                or rental.rentalStatuses.formattedName == 'READY FOR PICKUP'}">
+                            <input name="rentalId" th:value="${rental.id}" type="hidden"/>
+                            <button class="btn btn-outline-danger btn-sm" type="submit">
+                                <i class="bi bi-x-circle me-1"></i> Cancel
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Collapsible Details Section -->
+                <div class="collapse" th:id="'details__' + ${rental.id}">
+                    <div class="card-body bg-body-tertiary rounded-3 border border-secondary-subtle">
+                        <div class="row gy-3">
+                            <!-- Rental Dates -->
+                            <div class="col-md-6 border-end border-secondary-subtle pe-md-4">
+                                <h6 class="text-info fw-semibold small">
+                                    <i class="bi bi-calendar-range me-1"></i> Rental Dates
+                                </h6>
+                                <p class="mb-1"><strong>Start:</strong> <span
+                                        th:text="${rental.getStartDateFormated()}"></span>
+                                </p>
+                                <p class="mb-0"><strong>End:</strong> <span
+                                        th:text="${rental.getEndDateFormated()}"></span></p>
+                            </div>
+
+                            <!-- Car Details -->
+                            <div class="col-md-6">
+                                <h6 class="text-info fw-semibold small">
+                                    <i class="bi bi-car-front me-1"></i> Car Details
+                                </h6>
+                                <p class="mb-1">
+                                    <a class="text-info text-decoration-underline"
+                                       th:href="@{/carDetails/{id}(id=${rental.carId})}"
+                                       th:text="${rental.carModelInfo}"></a>
+                                </p>
+                                <p class="mb-1"><strong>Plate:</strong> <span
+                                        th:text="${rental.plateNumber}"></span></p>
+                                <p class="mb-0"><strong>Price/day:</strong> <span
+                                        th:text="${rental.price + ' $'}"></span></p>
+                            </div>
+
+                            <!-- Total Cost -->
+                            <div class="col-md-6 border-end border-secondary-subtle pe-md-4">
+                                <h6 class="text-info fw-semibold small">Total Cost</h6>
+                                <p class="fw-bold fs-6 badge bg-success mb-0" th:text="${rental.totalCost + ' $'}"></p>
+                            </div>
+
+                            <!-- Additional Rental Options -->
+                            <div class="col-md-6" th:if="${!#lists.isEmpty(rental.rentalExtras)}">
+                                <h6 class="text-info fw-semibold small">Additional Options</h6>
+                                <ul class="list-inline mb-0">
+                                    <li class="list-inline-item badge rounded-pill bg-info text-dark py-1 px-2"
+                                        th:each="opt : ${rental.rentalExtras}"
+                                        th:text="${opt.name + ' (' + opt.price + '$/d)'}"></li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination (When Multiple Pages Exist) -->
+            <nav class="mt-4" th:if="${page.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <!-- Previous Page Button -->
+                    <li class="page-item" th:classappend="${page.pageNumber == 0} ? 'disabled'">
+                        <a class="page-link" th:href="@{/rentHistory(page=${page.pageNumber - 1})}">Previous</a>
+                    </li>
+
+                    <!-- Current Page Display -->
+                    <li class="page-item disabled">
+                        <span class="page-link">Page <span th:text="${page.pageNumber + 1}"></span> of <span
+                                th:text="${page.totalPages}"></span></span>
+                    </li>
+
+                    <!-- Next Page Button -->
+                    <li class="page-item" th:classappend="${page.pageNumber + 1 >= page.totalPages} ? 'disabled'">
+                        <a class="page-link" th:href="@{/rentHistory(page=${page.pageNumber + 1})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+
+<!-- Script to handle rental cancellation confirmation -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Loop through each cancel rental form
+        document.querySelectorAll('.cancel-rental-form').forEach(function (form) {
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();  // Prevent the form submission
+
+                // Show confirmation popup using Swal (SweetAlert)
+                const message = 'Cancel rental #' + form.querySelector('input[name="rentalId"]').value + '?';
+                Swal.fire({
+                    text: message,
+                    icon: 'warning',
+                    background: '#2e2a3a',
+                    color: '#fff',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, cancel',
+                    cancelButtonText: 'No',
+                }).then((result) => {
+                    // If confirmed, submit the form
+                    if (result.isConfirmed) form.submit();
+                });
+            });
+        });
+    });
+</script>
+</body>
+</html>

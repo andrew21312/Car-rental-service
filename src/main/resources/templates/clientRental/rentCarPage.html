@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='Rent a Car')}"></head>
+<body class="bg-dark text-light">
+
+<!-- Navigation Bar -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<!-- Main Content Area for Car Rental Form -->
+<div class="container-lg my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <!-- Car Rental Form -->
+            <form method="POST"
+                  th:action="@{/rentCar(modelId=${car.model.id},carId=${rental.car?.id ?: availableCars[0].id})}" th:object="${rental}">
+                <!-- Hidden field to carry the rental ID -->
+                <input th:field="*{id}" type="hidden"/>
+
+                <!-- Car Model Card -->
+                <div class="card border-0 shadow-lg rounded-4 bg-body-tertiary mb-4">
+                    <!-- Header: Car Model Name -->
+                    <div class="card-header bg-primary text-light text-center rounded-0">
+                        <h2 class="mb-0" th:text="${car.model.getCarModelInfo()}">Model Name</h2>
+                    </div>
+
+                    <!-- Body: Car Specifications and Options -->
+                    <div class="card-body p-4">
+                        <!-- Car Specifications (Engine, Transmission, Seats) -->
+                        <dl class="row gx-4 gy-3 mb-4">
+                            <!-- Engine Type -->
+                            <dt class="col-sm-6 text-muted">
+                                <i class="bi bi-fuel-pump-fill me-1"></i> Engine
+                            </dt>
+                            <dd class="col-sm-6"
+                                th:text="${#strings.capitalize(#strings.toLowerCase(car.model.engineType))}">
+                                Petrol
+                            </dd>
+
+                            <!-- Transmission Type -->
+                            <dt class="col-sm-6 text-muted">
+                                <i class="bi bi-gear-fill me-1"></i> Transmission
+                            </dt>
+                            <dd class="col-sm-6"
+                                th:text="${#strings.capitalize(#strings.toLowerCase(car.model.transmission))}">
+                                Auto
+                            </dd>
+
+                            <!-- Number of Seats -->
+                            <dt class="col-sm-6 text-muted">
+                                <i class="bi bi-people-fill me-1"></i> Seats
+                            </dt>
+                            <dd class="col-sm-6" th:text="${car.model.seats}">5</dd>
+                        </dl>
+
+                        <!-- Car Price Per Day -->
+                        <div class="text-center mb-4">
+                            <span class="badge bg-success fs-5"
+                                  th:text="${car.model.price + ' $/day'}">
+                              100 $/day
+                            </span>
+                        </div>
+
+                        <!-- Car Selection Dropdown -->
+                        <div class="mb-4">
+                            <label class="form-label" for="carSelect">Select a Car</label>
+                            <div class="input-group">
+                                <!-- Icon inside the input group -->
+                                <span class="input-group-text bg-secondary text-light">
+                                  <i class="bi bi-hash"></i>
+                                </span>
+                                <select class="form-select form-select-sm" id="carSelect"
+                                        th:onchange="|location.href='/rentCar?modelId=' + ${car.model.id} + '&carId=' + this.value|">
+                                    <!-- Dynamic List of Available Cars -->
+                                    <option th:each="c : ${availableCars}"
+                                            th:selected="${c.id == (rental.car?.id ?: availableCars[0].id)}"
+                                            th:text="'#' + ${c.id} + ' – ' + ${c.model.model}"
+                                            th:value="${c.id}">
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Date Range Picker for Rental -->
+                        <div class="form-floating mb-4 position-relative">
+                            <input class="form-control bg-dark text-light ps-5" id="dateRange" name="dateRange"
+                                   placeholder="Select dates"
+                                   required type="text"/>
+                            <label for="dateRange">Date Range</label>
+                        </div>
+
+                        <!-- Additional Rental Options (Extras) -->
+                        <div class="mb-4">
+                            <p class="text-info fw-bold mb-2">Additional Options</p>
+                            <div class="row row-cols-1 row-cols-md-2 g-3">
+                                <!-- Loop through each available extra option -->
+                                <div class="col" th:each="opt : ${rentalExtras}">
+                                    <label class="d-block border rounded p-2 form-element cursor-pointer">
+                                        <input class="form-check-input me-2" name="selectedExtraIds"
+                                               th:data-price="${opt.price}"
+                                               th:value="${opt.id}"
+                                               type="checkbox"/>
+                                        <span th:text="${opt.name}"></span>
+                                        <span class="badge bg-success float-end"
+                                              th:text="${opt.price + '$/d'}"></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer: Total Price and Rent Now Button -->
+                    <div class="card-footer bg-transparent border-top">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <!-- Display Total Price -->
+                            <h5 class="text-warning mb-0" id="totalPrice"></h5>
+
+                            <!-- Rent Now Button -->
+                            <button class="btn btn-success btn-lg shadow" type="submit">
+                                <i class="bi bi-cart-fill me-1"></i> Rent Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Script for Date Range Picker and Cost Calculation -->
+<script th:inline="javascript">
+    // Variables for blocked dates and daily rental rate
+    const blockedDates = [[${blockedDates}]];
+    const dailyRate = [[${car.model.price}]];
+
+    // Initialize the date range picker (flatpickr)
+    const fp = flatpickr("#dateRange", {
+        mode: "range",  // Allow range selection (start and end dates)
+        dateFormat: "Y-m-d",  // Date format
+        minDate: new Date(Date.now() + 86400000),  // Disable past dates
+        disable: blockedDates,  // Block unavailable dates
+        onChange: updateCost  // Call updateCost function when date changes
+    });
+
+    // Add event listeners to update the total price when an extra option is selected/deselected
+    document.querySelectorAll("input[name='selectedExtraIds']").forEach(cb =>
+        cb.addEventListener("change", () => updateCost(fp.selectedDates))
+    );
+
+    // Function to update the total rental cost
+    function updateCost(dates) {
+        const out = document.getElementById("totalPrice");
+        if (dates.length === 2) {
+            // Calculate the number of rental days
+            const days = Math.ceil((dates[1] - dates[0]) / (1000 * 60 * 60 * 24));
+
+            // Calculate the cost of selected extras
+            let extras = 0;
+            document.querySelectorAll("input[name='selectedExtraIds']:checked")
+                .forEach(ch => extras += parseFloat(ch.dataset.price) || 0);
+
+            // Display the total cost (base rate + extras) * number of days
+            out.innerText = `Total: ${(dailyRate + extras) * days} $`;
+        } else {
+            // Clear total price if no valid date range selected
+            out.innerText = '';
+        }
+    }
+</script>
+
+</body>
+</html>
