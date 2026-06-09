@@ -1,0 +1,253 @@
+package com.car_rental.controller;
+
+import com.car_rental.entity.CarModel;
+import com.car_rental.entity.PageResult;
+import com.car_rental.service.CarModelService;
+import org.junit.jupiter.api.Test;
+import org.springframework.ui.Model;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.List;
+
+import static com.car_rental.constants.ControllerConstants.PAGE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.*;
+
+class CarModelControllerTest {
+
+    private final CarModelService carModelService = mock(CarModelService.class);
+    private final Model model = mock(Model.class);
+    private final RedirectAttributes redirectAttributes = mock(RedirectAttributes.class);
+
+    private final CarModelController controller =
+            new CarModelController(carModelService);
+
+    @Test
+    void getAllCarModels_ShouldSearchByModelName() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                null, null, "Toyota", null, 0, 10, "modelIdAsc"
+        )).thenReturn(pageResult);
+
+        String result = controller.getAllCarModels(
+                null, null, "Toyota", null, 0, 10, "modelIdAsc",
+                model, redirectAttributes
+        );
+
+        assertEquals("fleetManagerCarModel/carModelsPage", result);
+
+        verify(carModelService).getCarModelsPage(
+                null, null, "Toyota", null, 0, 10, "modelIdAsc"
+        );
+        verify(model).addAttribute(PAGE, pageResult);
+        verify(model).addAttribute("modelNameSearch", "Toyota");
+    }
+
+    @Test
+    void getAllCarModels_ShouldSearchByEngineType() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                "PETROL", null, null, null, 0, 10, "modelIdAsc"
+        )).thenReturn(pageResult);
+
+        String result = controller.getAllCarModels(
+                "PETROL", null, null, null, 0, 10, "modelIdAsc",
+                model, redirectAttributes
+        );
+
+        assertEquals("fleetManagerCarModel/carModelsPage", result);
+
+        verify(carModelService).getCarModelsPage(
+                "PETROL", null, null, null, 0, 10, "modelIdAsc"
+        );
+        verify(model).addAttribute("engineType", "PETROL");
+    }
+
+    @Test
+    void getAllCarModels_ShouldSearchBySeats() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                null, null, null, 5, 0, 10, "modelIdAsc"
+        )).thenReturn(pageResult);
+
+        String result = controller.getAllCarModels(
+                null, null, null, 5, 0, 10, "modelIdAsc",
+                model, redirectAttributes
+        );
+
+        assertEquals("fleetManagerCarModel/carModelsPage", result);
+
+        verify(carModelService).getCarModelsPage(
+                null, null, null, 5, 0, 10, "modelIdAsc"
+        );
+        verify(model).addAttribute("seats", 5);
+    }
+
+    @Test
+    void getAllCarModels_ShouldSearchByModelNameEngineTypeAndSeatsTogether() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                "DIESEL", null, "BMW", 5, 0, 10, "modelIdAsc"
+        )).thenReturn(pageResult);
+
+        String result = controller.getAllCarModels(
+                "DIESEL", null, "BMW", 5, 0, 10, "modelIdAsc",
+                model, redirectAttributes
+        );
+
+        assertEquals("fleetManagerCarModel/carModelsPage", result);
+
+        verify(carModelService).getCarModelsPage(
+                "DIESEL", null, "BMW", 5, 0, 10, "modelIdAsc"
+        );
+        verify(model).addAttribute("modelNameSearch", "BMW");
+        verify(model).addAttribute("engineType", "DIESEL");
+        verify(model).addAttribute("seats", 5);
+    }
+
+    @Test
+    void getAllCarModels_ShouldReturnEmptyPage_WhenNoVehiclesFound() {
+        PageResult<CarModel> emptyPage = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                null, null, "UnknownModel", null, 0, 10, "modelIdAsc"
+        )).thenReturn(emptyPage);
+
+        String result = controller.getAllCarModels(
+                null, null, "UnknownModel", null, 0, 10, "modelIdAsc",
+                model, redirectAttributes
+        );
+
+        assertEquals("fleetManagerCarModel/carModelsPage", result);
+
+        verify(carModelService).getCarModelsPage(
+                null, null, "UnknownModel", null, 0, 10, "modelIdAsc"
+        );
+        verify(model).addAttribute(PAGE, emptyPage);
+        verify(model).addAttribute("modelNameSearch", "UnknownModel");
+    }
+    @Test
+    void getAllCarModels_ShouldFilterByModelId() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                null, 3, null, null, 0, 10, "modelIdAsc"
+        )).thenReturn(pageResult);
+
+        String result = controller.getAllCarModels(
+                null, 3, null, null, 0, 10, "modelIdAsc",
+                model, redirectAttributes
+        );
+
+        assertEquals("fleetManagerCarModel/carModelsPage", result);
+
+        verify(carModelService).getCarModelsPage(
+                null, 3, null, null, 0, 10, "modelIdAsc"
+        );
+        verify(model).addAttribute("modelIdSearch", 3);
+    }
+
+    @Test
+    void getAllCarModels_ShouldFilterByEngineTypeAndModelId() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                "ELECTRIC", 4, null, null, 0, 10, "modelIdAsc"
+        )).thenReturn(pageResult);
+
+        String result = controller.getAllCarModels(
+                "ELECTRIC", 4, null, null, 0, 10, "modelIdAsc",
+                model, redirectAttributes
+        );
+
+        assertEquals("fleetManagerCarModel/carModelsPage", result);
+
+        verify(carModelService).getCarModelsPage(
+                "ELECTRIC", 4, null, null, 0, 10, "modelIdAsc"
+        );
+        verify(model).addAttribute("engineType", "ELECTRIC");
+        verify(model).addAttribute("modelIdSearch", 4);
+    }
+
+    @Test
+    void getAllCarModels_ShouldKeepFilterValuesInModel() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                "HYBRID", 2, "Prius", 5, 1, 10, "modelIdAsc"
+        )).thenReturn(pageResult);
+
+        String result = controller.getAllCarModels(
+                "HYBRID", 2, "Prius", 5, 1, 10, "modelIdAsc",
+                model, redirectAttributes
+        );
+
+        assertEquals("fleetManagerCarModel/carModelsPage", result);
+
+        verify(model).addAttribute("modelIdSearch", 2);
+        verify(model).addAttribute("modelNameSearch", "Prius");
+        verify(model).addAttribute("engineType", "HYBRID");
+        verify(model).addAttribute("seats", 5);
+    }
+    @Test
+    void getAllCarModels_ShouldSortByPriceAscending() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                null, null, null, null, 0, 10, "priceAsc"
+        )).thenReturn(pageResult);
+
+        String result = controller.getAllCarModels(
+                null, null, null, null, 0, 10, "priceAsc",
+                model, redirectAttributes
+        );
+
+        assertEquals("fleetManagerCarModel/carModelsPage", result);
+
+        verify(carModelService).getCarModelsPage(
+                null, null, null, null, 0, 10, "priceAsc"
+        );
+        verify(model).addAttribute("sortBy", "priceAsc");
+    }
+
+    @Test
+    void getAllCarModels_ShouldSortByPriceDescending() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                null, null, null, null, 0, 10, "priceDesc"
+        )).thenReturn(pageResult);
+
+        controller.getAllCarModels(
+                null, null, null, null, 0, 10, "priceDesc",
+                model, redirectAttributes
+        );
+
+        verify(carModelService).getCarModelsPage(
+                null, null, null, null, 0, 10, "priceDesc"
+        );
+        verify(model).addAttribute("sortBy", "priceDesc");
+    }
+
+    @Test
+    void getAllCarModels_ShouldSortTogetherWithFilters() {
+        PageResult<CarModel> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(carModelService.getCarModelsPage(
+                "HYBRID", null, "Prius", 5, 0, 10, "priceAsc"
+        )).thenReturn(pageResult);
+
+        controller.getAllCarModels(
+                "HYBRID", null, "Prius", 5, 0, 10, "priceAsc",
+                model, redirectAttributes
+        );
+
+        verify(carModelService).getCarModelsPage(
+                "HYBRID", null, "Prius", 5, 0, 10, "priceAsc"
+        );
+    }
+}

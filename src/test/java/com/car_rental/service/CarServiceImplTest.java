@@ -155,4 +155,5 @@ class CarServiceImplTest {
 
         verify(carDAO, never()).getAvailableCarsByModelId(anyInt());
     }
+
 }
