@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='Users List')}">Users List</head>
+<body class="bg-dark text-light">
+
+<!-- Navigation Bar -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-9">
+
+            <!-- Page Title -->
+            <h2 class="text-center mb-4">Users</h2>
+
+            <!-- Role Filter + Search Section -->
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="d-inline-block">Role Filter and Search</h5>
+                    <div class="d-inline-block">
+                        <!-- Кнопка очищення фільтрів -->
+                        <button class="btn btn-danger btn-sm" onclick="clearRoleFilters()">Clear Filters</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
+
+                        <!-- Role Filter (Dropdown) -->
+                        <div class="flex-grow-1">
+                            <label class="form-label" for="roleSelect">
+                                <i class="bi bi-person-badge"></i> Role
+                            </label>
+                            <select class="form-select form-select-sm" id="roleSelect"
+                                    onchange="updateRoleFilter(this)">
+                                <option value="">All Roles</option>
+                                <option th:each="r : ${roles}" th:selected="${r.id == roleId}"
+                                        th:text="${r.getNameCapitalized()}" th:value="${r.id}">
+                                </option>
+                            </select>
+                        </div>
+
+                        <!-- Page Size Selector (How many records per page) -->
+                        <div class="flex-grow-1">
+                            <label class="form-label" for="pageSizeSelect">
+                                <i class="bi bi-file-earmark-text"></i> Per page
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <select class="form-select" id="pageSizeSelect" onchange="updatePageSize(this)">
+                                    <option th:selected="${page.pageSize == 5}" value="5">5</option>
+                                    <option th:selected="${page.pageSize == 10}" value="10">10</option>
+                                    <option th:selected="${page.pageSize == 25}" value="25">25</option>
+                                    <option th:selected="${page.pageSize == 50}" value="50">50</option>
+                                    <option th:selected="${page.pageSize == 100}" value="100">100</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Sort By Selector (Sort Users by Username or User ID) -->
+                        <div class="flex-grow-1">
+                            <label class="form-label" for="sortBySelect">
+                                <i class="bi bi-sort-up"></i> Sort By
+                            </label>
+                            <select class="form-select form-select-sm" id="sortBySelect" onchange="updateSort(this)">
+                                <option th:selected="${sortBy == 'usernameAsc'}" value="usernameAsc">Username ↑</option>
+                                <option th:selected="${sortBy == 'usernameDesc'}" value="usernameDesc">Username ↓
+                                </option>
+                                <option th:selected="${sortBy == 'userIdDesc'}" value="userIdDesc">User Id ↓</option>
+                                <option th:selected="${sortBy == 'userIdAsc'}" value="userIdAsc">User Id ↑</option>
+                            </select>
+                        </div>
+
+                        <!-- Search by ID, Username, or Last Name -->
+                        <div class="flex-grow-1 w-100">
+                            <label class="form-label" for="userIdSearch">
+                                <i class="bi bi-search"></i> Search
+                            </label>
+                            <div class="input-group input-group-sm">
+                                <!-- Input Fields for Searching -->
+                                <input class="form-control form-control-sm" id="userIdSearch" placeholder="Search by id"
+                                       th:value="${userIdSearch}" type="number">
+                                <input class="form-control form-control-sm" id="usernameSearch"
+                                       placeholder="Search by username"
+                                       th:value="${usernameSearch}" type="text">
+                                <input class="form-control form-control-sm" id="lastNameSearch"
+                                       placeholder="Search by user last name" th:value="${lastNameSearch}" type="text">
+                                <!-- Search Button -->
+                                <button class="btn btn-outline-secondary btn-sm" onclick="buildSearchUrl()"
+                                        type="button">
+                                    <i class="bi bi-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- List of Users Displayed as Cards -->
+            <div class="card bg-card border-0 mb-3 shadow-sm" th:each="userInfo : ${page.content}">
+                <div class="card-body d-flex flex-column flex-md-row justify-content-between gap-3">
+
+                    <!-- User Information -->
+                    <div class="flex-grow-1">
+                        <h5 class="card-title text-light mb-2">
+                            #<span th:text="${userInfo.id}"></span>
+                            <small class="text-muted" th:text="${userInfo.username}"></small>
+                        </h5>
+                        <p class="card-text text-light mb-1">
+                            <i class="bi bi-person-circle me-1"></i>
+                            <span th:text="${userInfo.firstName + ' ' + userInfo.lastName}"></span>
+                        </p>
+                        <div class="d-flex flex-wrap gap-2">
+                            <!-- User Role Badge -->
+                            <span th:class="'pill pill-' + ${userInfo.role.getLowercaseName()}"
+                                  th:text="${userInfo.role.getNameCapitalized()}"></span>
+                            <!-- User Date Badge -->
+                            <span class="badge bg-secondary" th:text="${userInfo.getDate()}"></span>
+                            <!-- User Phone Badge -->
+                            <span class="badge bg-info bg-opacity-75" th:text="${userInfo.phoneNumber}"></span>
+                        </div>
+                    </div>
+
+                    <!-- User Actions (Edit, Delete) -->
+                    <div class="d-flex flex-column justify-content-around">
+                        <!-- Edit Button -->
+                        <a class="btn btn-primary btn-sm mb-1" th:href="@{/updateUser(id=${userInfo.id})}">
+                            <i class="bi bi-pencil-fill me-1"></i> Edit
+                        </a>
+                        <!-- Delete Button (Fragment Replacement) -->
+                        <div th:replace="~{fragments/formField :: delete-btn('/deleteUser','user',userInfo, w-100)}"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State (No Users Found) -->
+            <div class="text-center py-5" th:if="${#lists.isEmpty(page.content)}">
+                <p class="fs-4 text-muted">No users found</p>
+            </div>
+
+            <!-- Pagination Controls (Next, Previous) -->
+            <nav class="mt-4" th:if="${page.totalPages > 1}">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item" th:classappend="${page.pageNumber == 0} ? 'disabled'">
+                        <button class="page-link" th:onclick="|goToPage(${page.pageNumber - 1})|">Previous</button>
+                    </li>
+                    <li class="page-item disabled">
+                        <span class="page-link">
+                          Page <span th:text="${page.pageNumber + 1}"></span> of <span
+                                th:text="${page.totalPages}"></span>
+                        </span>
+                    </li>
+                    <li class="page-item" th:classappend="${page.pageNumber + 1 >= page.totalPages} ? 'disabled'">
+                        <button class="page-link" th:onclick="|goToPage(${page.pageNumber + 1})|">Next</button>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>
+</body>
+
+<!-- External JS Scripts -->
+<script src="/filters.js"></script>
+
+<script>
+    // Array of search field IDs and their corresponding URL parameter names
+    searchFields = [
+        {id: 'userIdSearch', param: 'userId'},
+        {id: 'usernameSearch', param: 'username'},
+        {id: 'lastNameSearch', param: 'lastName'},
+        {id: 'roleSelect', param: 'roleId'},
+        {id: 'sortBySelect', param: 'sortBy'}
+    ];
+
+    /**
+     * Generate custom search parameters for the current search filters.
+     * Filters out invalid userId values (<= 0).
+     * @returns {Object} - Search parameters for URL.
+     */
+    function getCustomSearchParams() {
+        const params = getSearchParams(searchFields);
+        const userId = params.get('userId')
+        // Remove invalid userId (<= 0)
+        if (userId && parseInt(userId) <= 0) {
+            params.delete('userId');
+        }
+        return params;
+    }
+
+    /**
+     * Update role filter based on user selection.
+     * @param {HTMLSelectElement} selectElement - The role select dropdown element.
+     */
+    function updateRoleFilter(selectElement) {
+        updateFilter(selectElement, 'roleId');
+    }
+
+
+    // Attach event listener to search inputs for 'Enter' key to trigger search
+    const searchInputs = document.querySelectorAll('#userIdSearch, #usernameSearch, #lastNameSearch');
+    handleEnterKeyForSearch(searchInputs);
+</script>

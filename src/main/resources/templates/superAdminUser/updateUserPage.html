@@ -1,0 +1,73 @@
+<!DOCTYPE HTML>
+<html data-bs-theme="dark" lang="uk">
+<head th:replace="~{fragments/headers::head(title='Update user')}">Update a user</head>
+<body class="bg-dark text-light">
+
+<!-- Navigation Bar -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<div class="container-lg my-5">
+    <div class="row justify-content-center">
+        <div class="col-11 col-md-7 col-lg-5">
+
+            <!-- Update User Card -->
+            <div class="card bg-body-tertiary bg-opacity-25 border-0 shadow-lg rounded-4">
+
+                <!-- Card Header with Title -->
+                <div class="card-header bg-primary text-light text-center">
+                    <h2 class="mb-0"><i class="bi bi-person-plus me-1"></i>Update User</h2>
+                </div>
+
+                <!-- Card Body containing the Update User Form -->
+                <div class="card-body p-4">
+                    <!-- Form to update user details -->
+                    <form class="row g-3" method="POST" th:action="@{/updateUser}"
+                          th:object="${userUpdateDTO}">
+
+                        <!-- Hidden input for User ID -->
+                        <input th:field="*{id}" type="hidden"/>
+
+                        <!-- Username Field -->
+                        <th:block
+                                th:replace="~{fragments/formField :: form-Field-generic(username, 'Username', 'col-12')}"></th:block>
+
+                        <!-- First Name Field -->
+                        <th:block
+                                th:replace="~{fragments/formField :: form-Field-generic(firstName, 'First name', 'col-md-6')}"></th:block>
+
+                        <!-- Last Name Field -->
+                        <th:block
+                                th:replace="~{fragments/formField :: form-Field-generic(lastName, 'Last name', 'col-md-6')}"></th:block>
+
+                        <!-- Phone Number Field -->
+                        <th:block
+                                th:replace="~{fragments/formField :: form-Field-generic(phoneNumber, 'Phone number', 'col-12')}"></th:block>
+
+                        <!-- Role Dropdown -->
+                        <th:block
+                                th:replace="~{fragments/formField :: form-select-object(role, 'Role', roles, getRoleName, 'col-12')}"></th:block>
+
+                        <!-- Submit Button Section -->
+                        <div class="col-12 d-flex justify-content-center gap-3 mt-3">
+                            <button class="btn btn-primary" type="submit">
+                                <i class="bi bi-check-circle me-1"></i>Save
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+
+                <!-- Card Footer with Back Link -->
+                <div class="card-footer bg-transparent text-center">
+                    <small class="text-muted">
+                        <!-- Link to navigate back to the users list -->
+                        <a class="link-primary" href="/users">Back to list</a>
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
