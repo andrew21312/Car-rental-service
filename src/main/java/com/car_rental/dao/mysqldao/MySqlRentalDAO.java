@@ -132,8 +132,10 @@ public class MySqlRentalDAO extends BasePaginationDAO implements RentalDAO {
     private static final String COUNT_CLIENT_RENTALS_QUERY =
             "SELECT COUNT(*) FROM rentals WHERE client_id = ?";
 
-    private static final String CLIENT_FILTER_COMPLETED = " AND rentals.end_date < CURDATE()";
-    private static final String CLIENT_FILTER_ACTIVE = " AND rentals.end_date >= CURDATE()";
+    private static final String CLIENT_FILTER_COMPLETED =
+            " AND rentals.status_id = (SELECT id FROM rental_statuses WHERE name = 'COMPLETED')";
+    private static final String CLIENT_FILTER_ACTIVE =
+            " AND rentals.status_id = (SELECT id FROM rental_statuses WHERE name = 'ACTIVE')";
 
     private static final String FAVORITE_CAR_MODELS_LAST_MONTH = """
                 SELECT
