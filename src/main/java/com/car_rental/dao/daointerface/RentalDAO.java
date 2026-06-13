@@ -21,7 +21,7 @@ public interface RentalDAO {
 
     List<String> getBlockedDatesForCar(int carId, int status1, int status2);
 
-    PageResult<Rental> getClientRentalsPage(int clientId, int page, int size);
+    PageResult<Rental> getClientRentalsPage(int clientId, String filter, int page, int size);
 
     boolean isCarAvailable(int carId, LocalDate startDate, LocalDate endDate, int status1, int status2);
 

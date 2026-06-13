@@ -133,13 +133,15 @@ public class ClientRentalController {
     @GetMapping("/rentHistory")
     public String viewRentalHistory(@RequestParam(defaultValue = "0") int page,
                                     @RequestParam(defaultValue = "10") int size,
+                                    @RequestParam(defaultValue = "all") String filter,
                                     Model model,
                                     RedirectAttributes redirectAttributes,
                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
         try {
             User client = userService.getUserByUsername(userDetails.getUsername());
-            PageResult<Rental> rentalPage = rentalService.getClientRentalsPage(client.getId(), page, size);
+            PageResult<Rental> rentalPage = rentalService.getClientRentalsPage(client.getId(), filter, page, size);
             model.addAttribute(PAGE, rentalPage);
+            model.addAttribute("filter", filter);
             return RENTAL_HISTORY_PAGE;
         } catch (Exception e) {
             logger.error("Failed to retrieve rentals: {}", e.getMessage(), e);

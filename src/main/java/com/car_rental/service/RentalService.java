@@ -21,7 +21,7 @@ public interface RentalService {
 
     List<String> getBlockedDatesForCar(int carId);
 
-    PageResult<Rental> getClientRentalsPage(int clientId, int page, int size);
+    PageResult<Rental> getClientRentalsPage(int clientId, String filter, int page, int size);
 
     boolean isValidStatusTransition(String currentStatus, String newStatus);
 

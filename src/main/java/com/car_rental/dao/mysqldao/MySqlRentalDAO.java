@@ -132,6 +132,9 @@ public class MySqlRentalDAO extends BasePaginationDAO implements RentalDAO {
     private static final String COUNT_CLIENT_RENTALS_QUERY =
             "SELECT COUNT(*) FROM rentals WHERE client_id = ?";
 
+    private static final String CLIENT_FILTER_COMPLETED = " AND rentals.end_date < CURDATE()";
+    private static final String CLIENT_FILTER_ACTIVE = " AND rentals.end_date >= CURDATE()";
+
     private static final String FAVORITE_CAR_MODELS_LAST_MONTH = """
                 SELECT
                 r.car_model_name AS modelName,
@@ -292,17 +295,25 @@ public class MySqlRentalDAO extends BasePaginationDAO implements RentalDAO {
     }
 
     @Override
-    public PageResult<Rental> getClientRentalsPage(int clientId, int page, int size) {
+    public PageResult<Rental> getClientRentalsPage(int clientId, String filter, int page, int size) {
         int offset = page * size;
+        String filterCondition = buildClientFilterCondition(filter);
 
         List<Rental> rentals = jdbcTemplate.query(
-                SELECT_RENTALS_BY_CLIENT_ID + " ORDER BY rental_id DESC LIMIT ? OFFSET ?",
+                SELECT_RENTALS_BY_CLIENT_ID + filterCondition + " ORDER BY rental_id DESC LIMIT ? OFFSET ?",
                 rentalRowMapper, clientId, size, offset);
         loadRentalExtrasForRentals(rentals);
 
-        Long totalElements = jdbcTemplate.queryForObject(COUNT_CLIENT_RENTALS_QUERY, Long.class, clientId);
+        Long totalElements = jdbcTemplate.queryForObject(
+                COUNT_CLIENT_RENTALS_QUERY + filterCondition, Long.class, clientId);
 
         return new PageResult<>(rentals, page, size, totalElements);
+    }
+
+    private String buildClientFilterCondition(String filter) {
+        if ("completed".equals(filter)) return CLIENT_FILTER_COMPLETED;
+        if ("active".equals(filter)) return CLIENT_FILTER_ACTIVE;
+        return "";
     }
 
     private void loadRentalExtrasForRentals(List<Rental> rentals) {

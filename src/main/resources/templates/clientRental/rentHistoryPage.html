@@ -11,11 +11,33 @@
         <div class="col-12 col-md-10 col-lg-8">
 
             <!-- Page Title -->
-            <h2 class="display-6 text-center mb-5">My Rental History</h2>
+            <h2 class="display-6 text-center mb-4">My Rental History</h2>
+
+            <!-- Filter Buttons -->
+            <div class="d-flex justify-content-center gap-2 mb-5 flex-wrap">
+                <a class="btn btn-sm fw-semibold"
+                   th:classappend="${filter == 'all'} ? 'btn-info' : 'btn-outline-info'"
+                   th:href="@{/rentHistory(filter='all')}">
+                    <i class="bi bi-list-ul me-1"></i> All My Rentals
+                </a>
+                <a class="btn btn-sm fw-semibold"
+                   th:classappend="${filter == 'active'} ? 'btn-success' : 'btn-outline-success'"
+                   th:href="@{/rentHistory(filter='active')}">
+                    <i class="bi bi-clock me-1"></i> Active Rentals
+                </a>
+                <a class="btn btn-sm fw-semibold"
+                   th:classappend="${filter == 'completed'} ? 'btn-secondary' : 'btn-outline-secondary'"
+                   th:href="@{/rentHistory(filter='completed')}">
+                    <i class="bi bi-check-circle me-1"></i> Completed Rentals
+                </a>
+            </div>
 
             <!-- Empty State (No Rentals Found) -->
             <div class="text-center py-5" th:if="${#lists.isEmpty(page.content)}">
-                <p class="fs-3 text-muted">No rentals found</p>
+                <p class="fs-3 text-muted"
+                   th:text="${filter == 'completed'} ? 'No completed rentals found'
+                           : (${filter == 'active'} ? 'No active rentals found'
+                           : 'No rentals found')"></p>
             </div>
 
             <!-- Rentals List -->
@@ -144,7 +166,8 @@
                 <ul class="pagination justify-content-center">
                     <!-- Previous Page Button -->
                     <li class="page-item" th:classappend="${page.pageNumber == 0} ? 'disabled'">
-                        <a class="page-link" th:href="@{/rentHistory(page=${page.pageNumber - 1})}">Previous</a>
+                        <a class="page-link"
+                           th:href="@{/rentHistory(page=${page.pageNumber - 1}, filter=${filter})}">Previous</a>
                     </li>
 
                     <!-- Current Page Display -->
@@ -155,7 +178,8 @@
 
                     <!-- Next Page Button -->
                     <li class="page-item" th:classappend="${page.pageNumber + 1 >= page.totalPages} ? 'disabled'">
-                        <a class="page-link" th:href="@{/rentHistory(page=${page.pageNumber + 1})}">Next</a>
+                        <a class="page-link"
+                           th:href="@{/rentHistory(page=${page.pageNumber + 1}, filter=${filter})}">Next</a>
                     </li>
                 </ul>
             </nav>

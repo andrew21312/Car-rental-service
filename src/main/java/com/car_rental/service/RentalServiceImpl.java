@@ -193,9 +193,9 @@ public class RentalServiceImpl implements RentalService {
      * @throws DataAccessException if there's an error retrieving rentals
      */
     @Override
-    public PageResult<Rental> getClientRentalsPage(int clientId, int page, int size) {
+    public PageResult<Rental> getClientRentalsPage(int clientId, String filter, int page, int size) {
         try {
-            return rentalDao.getClientRentalsPage(clientId, page, size);
+            return rentalDao.getClientRentalsPage(clientId, filter, page, size);
         } catch (Exception e) {
             log.error("Error retrieving rentals by client id {}: {}", clientId, e.getMessage(), e);
             throw new DataAccessException(utilityService.handleException(e));
