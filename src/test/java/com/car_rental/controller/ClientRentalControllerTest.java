@@ -2,6 +2,7 @@ package com.car_rental.controller;
 
 import com.car_rental.dao.DataAccessException;
 import com.car_rental.entity.*;
+import com.car_rental.form.rental.FavoriteCarModelStat;
 import com.car_rental.form.rental.RentalDTO;
 import com.car_rental.security.UserDetailsImpl;
 import com.car_rental.service.CarService;
@@ -139,7 +140,82 @@ class ClientRentalControllerTest {
                 "Your rental has been processed successfully."
         );
     }
+    @Test
+    void cancelRental_ShouldCancelRental_WhenStatusIsApproved() {
+        Rental rental = mock(Rental.class);
+        when(rental.getRentalStatusName()).thenReturn("APPROVED");
+        when(userDetails.getId()).thenReturn(5);
+        when(rentalService.getRentalById(10)).thenReturn(rental);
 
+        String result = controller.cancelRental(10, userDetails, redirectAttributes);
+
+        assertEquals("redirect:/rentHistory", result);
+        verify(rentalService).cancelRental(10, 5);
+    }
+
+    @Test
+    void cancelRental_ShouldCancelRental_WhenStatusIsReadyForPickup() {
+        Rental rental = mock(Rental.class);
+        when(rental.getRentalStatusName()).thenReturn("READY_FOR_PICKUP");
+        when(userDetails.getId()).thenReturn(5);
+        when(rentalService.getRentalById(10)).thenReturn(rental);
+
+        String result = controller.cancelRental(10, userDetails, redirectAttributes);
+
+        assertEquals("redirect:/rentHistory", result);
+        verify(rentalService).cancelRental(10, 5);
+    }
+    @Test
+    void cancelRental_ShouldRedirectWithError_WhenDataAccessExceptionThrown() {
+        Rental rental = mock(Rental.class);
+        when(rental.getRentalStatusName()).thenReturn("PENDING");
+        when(userDetails.getId()).thenReturn(5);
+        when(rentalService.getRentalById(10)).thenReturn(rental);
+        doThrow(new DataAccessException("Unauthorized"))
+                .when(rentalService).cancelRental(10, 5);
+
+        String result = controller.cancelRental(10, userDetails, redirectAttributes);
+
+        assertEquals("redirect:/rentHistory", result);
+        verify(redirectAttributes).addFlashAttribute(ERROR_MSG, "Unauthorized");
+    }
+    @Test
+    void viewRentalHistory_ShouldRedirectToMain_WhenServiceThrows() {
+        when(userDetails.getUsername()).thenReturn("client");
+        when(userService.getUserByUsername("client"))
+                .thenThrow(new RuntimeException("DB error"));
+
+        String result = controller.viewRentalHistory(
+                0, 10, "all", model, redirectAttributes, userDetails);
+
+        assertEquals(REDIRECT_TO_MAIN_PAGE, result);
+        verify(redirectAttributes).addFlashAttribute(eq(ERROR_MSG), any());
+    }
+    @Test
+    void processRental_ShouldReturnForm_WhenServiceThrowsOnAddRental() {
+        Car car = createCar();
+        User user = new User();
+        user.setId(5);
+
+        RentalDTO rentalDTO = new RentalDTO();
+        rentalDTO.setDateRange("2026-06-10 to 2026-06-13");
+        rentalDTO.setSelectedExtraIds(List.of());
+
+        when(carService.getCarById(1)).thenReturn(car);
+        when(carService.getAvailableCarsByModelId(1)).thenReturn(List.of(car));
+        when(bindingResult.hasErrors()).thenReturn(false);
+        when(rentalService.isCarAvailable(eq(1), any(), any())).thenReturn(true);
+        when(userDetails.getId()).thenReturn(5);
+        when(userService.getUserById(5)).thenReturn(user);
+        when(rentalService.getBlockedDatesForCar(1)).thenReturn(List.of());
+        doThrow(new RuntimeException("DB error")).when(rentalService).addRental(any());
+
+        String result = controller.processRental(
+                1, 1, rentalDTO, bindingResult, model, userDetails, redirectAttributes);
+
+        assertEquals("clientRental/rentCarPage", result);
+        verify(model).addAttribute(eq(ERROR_MSG), contains("DB error"));
+    }
     @Test
     void processRental_ShouldReturnForm_WhenDateRangeIsInvalid() {
         Car car = createCar();
