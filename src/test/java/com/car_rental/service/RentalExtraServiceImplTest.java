@@ -141,7 +141,7 @@ class RentalExtraServiceImplTest {
         verify(logService).logEvent(
                 10,
                 Log.AuditEventType.ADD_EXTRA,
-                "Added extra: GPS | price: 5.00"
+                "Added extra: GPS | price: 5,00"
         );
 
         assertEquals(newExtra, service.getExtraByName("GPS"));
@@ -173,7 +173,7 @@ class RentalExtraServiceImplTest {
         verify(logService).logEvent(
                 10,
                 Log.AuditEventType.UPDATE_EXTRA,
-                "Updated extra #1: GPS Plus | price: 7.50"
+                "Updated extra #1: GPS Plus | price: 7,50"
         );
 
         assertEquals(updatedExtra, service.getExtraByName("GPS Plus"));

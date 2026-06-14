@@ -99,12 +99,12 @@ class RentalServiceImplTest {
     void getClientRentalsPage_ShouldReturnClientRentals() {
         PageResult<Rental> pageResult = new PageResult<>(List.of(), 0, 10, 0);
 
-        when(rentalDAO.getClientRentalsPage(5, 0, 10)).thenReturn(pageResult);
+        when(rentalDAO.getClientRentalsPage(5, "all", 0, 10)).thenReturn(pageResult);
 
-        PageResult<Rental> result = service.getClientRentalsPage(5, 0, 10);
+        PageResult<Rental> result = service.getClientRentalsPage(5, "all", 0, 10);
 
         assertEquals(pageResult, result);
-        verify(rentalDAO).getClientRentalsPage(5, 0, 10);
+        verify(rentalDAO).getClientRentalsPage(5, "all", 0, 10);
     }
 
     @Test

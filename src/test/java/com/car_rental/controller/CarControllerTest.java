@@ -2,11 +2,9 @@ package com.car_rental.controller;
 
 import com.car_rental.entity.Car;
 import com.car_rental.entity.CarModel;
-import com.car_rental.entity.CarStatuses;
 import com.car_rental.entity.PageResult;
 import com.car_rental.service.CarModelService;
 import com.car_rental.service.CarService;
-import com.car_rental.service.CarStatusService;
 import org.junit.jupiter.api.Test;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -21,26 +19,14 @@ import static org.mockito.Mockito.*;
 class CarControllerTest {
 
     private final CarService carService = mock(CarService.class);
-    private final CarStatusService carStatusService = mock(CarStatusService.class);
     private final CarModelService carModelService = mock(CarModelService.class);
     private final Model model = mock(Model.class);
     private final BindingResult bindingResult = mock(BindingResult.class);
     private final RedirectAttributes redirectAttributes = mock(RedirectAttributes.class);
 
     private final CarController controller =
-            new CarController(carService, carStatusService, carModelService);
+            new CarController(carService, carModelService);
 
-    @Test
-    void populateStatusTypes_ShouldReturnStatusList() {
-        List<CarStatuses> statuses = List.of(new CarStatuses());
-
-        when(carStatusService.getStatusList()).thenReturn(statuses);
-
-        List<CarStatuses> result = controller.populateStatusTypes();
-
-        assertEquals(statuses, result);
-        verify(carStatusService).getStatusList();
-    }
 
     @Test
     void populateAllCarModels_ShouldReturnCarModels() {

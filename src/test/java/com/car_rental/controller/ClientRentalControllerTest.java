@@ -204,11 +204,12 @@ class ClientRentalControllerTest {
 
         when(userDetails.getUsername()).thenReturn("client");
         when(userService.getUserByUsername("client")).thenReturn(user);
-        when(rentalService.getClientRentalsPage(5, 0, 10)).thenReturn(rentalPage);
+        when(rentalService.getClientRentalsPage(5, "all", 0, 10)).thenReturn(rentalPage);
 
         String result = controller.viewRentalHistory(
                 0,
                 10,
+                "all",
                 model,
                 redirectAttributes,
                 userDetails
@@ -216,6 +217,7 @@ class ClientRentalControllerTest {
 
         assertEquals("clientRental/rentHistoryPage", result);
         verify(model).addAttribute(PAGE, rentalPage);
+        verify(model).addAttribute("filter", "all");
     }
 
     @Test
