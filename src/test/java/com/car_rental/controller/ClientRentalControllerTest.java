@@ -241,7 +241,39 @@ class ClientRentalControllerTest {
         verify(model).addAttribute(ERROR_MSG, "Invalid date range format.");
         verify(rentalService, never()).addRental(any());
     }
+    @Test
+    void viewRentalHistory_ShouldReturnHistoryPage_WithCompletedFilter() {
+        User user = new User();
+        user.setId(5);
+        PageResult<Rental> rentalPage = new PageResult<>(List.of(), 0, 10, 0);
 
+        when(userDetails.getUsername()).thenReturn("client");
+        when(userService.getUserByUsername("client")).thenReturn(user);
+        when(rentalService.getClientRentalsPage(5, "completed", 0, 10)).thenReturn(rentalPage);
+
+        String result = controller.viewRentalHistory(0, 10, "completed", model, redirectAttributes, userDetails);
+
+        assertEquals("clientRental/rentHistoryPage", result);
+        verify(model).addAttribute(PAGE, rentalPage);
+        verify(model).addAttribute("filter", "completed");
+    }
+
+    @Test
+    void viewRentalHistory_ShouldReturnHistoryPage_WithActiveFilter() {
+        User user = new User();
+        user.setId(5);
+        PageResult<Rental> rentalPage = new PageResult<>(List.of(), 0, 10, 0);
+
+        when(userDetails.getUsername()).thenReturn("client");
+        when(userService.getUserByUsername("client")).thenReturn(user);
+        when(rentalService.getClientRentalsPage(5, "active", 0, 10)).thenReturn(rentalPage);
+
+        String result = controller.viewRentalHistory(0, 10, "active", model, redirectAttributes, userDetails);
+
+        assertEquals("clientRental/rentHistoryPage", result);
+        verify(model).addAttribute(PAGE, rentalPage);
+        verify(model).addAttribute("filter", "active");
+    }
     @Test
     void processRental_ShouldReturnForm_WhenCarIsNotAvailable() {
         Car car = createCar();
