@@ -26,15 +26,6 @@
                         <li><a class="dropdown-item" href="/createUser">Create User</a></li>
                     </ul>
                 </li>
-                <li class="nav-item dropdown" sec:authorize="hasAuthority('SUPER_ADMIN')">
-                    <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
-                       id="extrasDropdown" role="button">
-                        <i class="bi bi-gear-fill me-1"></i> Extras
-                    </a>
-                    <ul aria-labelledby="extrasDropdown" class="dropdown-menu dropdown-menu-dark">
-                        <li><a class="dropdown-item" href="/extras">All Extras</a></li>
-                    </ul>
-                </li>
                 <!-- Cars -->
                 <li class="nav-item dropdown" sec:authorize="hasAuthority('FLEET_MANAGER')">
                     <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
@@ -66,16 +57,6 @@
                     <ul aria-labelledby="prepareDropdown" class="dropdown-menu dropdown-menu-dark">
                         <li><a class="dropdown-item" href="/carsToPrepare">Cars to Prepare</a></li>
                         <li><a class="dropdown-item" href="/carsIssues">Car Issues</a></li>
-                    </ul>
-                </li>
-                <!-- Rentals -->
-                <li class="nav-item dropdown" sec:authorize="hasAnyAuthority('ADMIN','SUPER_ADMIN')">
-                    <a aria-expanded="false" class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#"
-                       id="rentalsDropdown" role="button">
-                        <i class="bi bi-card-checklist me-1"></i> Rentals
-                    </a>
-                    <ul aria-labelledby="rentalsDropdown" class="dropdown-menu dropdown-menu-dark">
-                        <li><a class="dropdown-item" href="/rentals">All Rentals</a></li>
                     </ul>
                 </li>
                 <!-- Logs -->
