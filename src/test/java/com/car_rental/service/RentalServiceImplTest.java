@@ -99,14 +99,54 @@ class RentalServiceImplTest {
     void getClientRentalsPage_ShouldReturnClientRentals() {
         PageResult<Rental> pageResult = new PageResult<>(List.of(), 0, 10, 0);
 
-        when(rentalDAO.getClientRentalsPage(5, 0, 10)).thenReturn(pageResult);
+        when(rentalDAO.getClientRentalsPage(5, "all", 0, 10)).thenReturn(pageResult);
 
-        PageResult<Rental> result = service.getClientRentalsPage(5, 0, 10);
+        PageResult<Rental> result = service.getClientRentalsPage(5, "all", 0, 10);
 
         assertEquals(pageResult, result);
-        verify(rentalDAO).getClientRentalsPage(5, 0, 10);
+        verify(rentalDAO).getClientRentalsPage(5, "all", 0, 10);
+    }
+    @Test
+    void getClientRentalsPage_ShouldReturnAllRentals_WhenFilterIsAll() {
+        PageResult<Rental> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+        when(rentalDAO.getClientRentalsPage(5, "all", 0, 10)).thenReturn(pageResult);
+
+        PageResult<Rental> result = service.getClientRentalsPage(5, "all", 0, 10);
+
+        assertEquals(pageResult, result);
+        verify(rentalDAO).getClientRentalsPage(5, "all", 0, 10);
     }
 
+    @Test
+    void getClientRentalsPage_ShouldReturnCompletedRentals_WhenFilterIsCompleted() {
+        PageResult<Rental> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+        when(rentalDAO.getClientRentalsPage(5, "completed", 0, 10)).thenReturn(pageResult);
+
+        PageResult<Rental> result = service.getClientRentalsPage(5, "completed", 0, 10);
+
+        assertEquals(pageResult, result);
+        verify(rentalDAO).getClientRentalsPage(5, "completed", 0, 10);
+    }
+
+    @Test
+    void getClientRentalsPage_ShouldReturnActiveRentals_WhenFilterIsActive() {
+        PageResult<Rental> pageResult = new PageResult<>(List.of(), 0, 10, 0);
+        when(rentalDAO.getClientRentalsPage(5, "active", 0, 10)).thenReturn(pageResult);
+
+        PageResult<Rental> result = service.getClientRentalsPage(5, "active", 0, 10);
+
+        assertEquals(pageResult, result);
+        verify(rentalDAO).getClientRentalsPage(5, "active", 0, 10);
+    }
+
+    @Test
+    void getClientRentalsPage_ShouldThrowDataAccessException_WhenDAOFails() {
+        when(rentalDAO.getClientRentalsPage(anyInt(), any(), anyInt(), anyInt()))
+                .thenThrow(new RuntimeException("DB error"));
+
+        assertThrows(DataAccessException.class,
+                () -> service.getClientRentalsPage(5, "all", 0, 10));
+    }
     @Test
     void updateRentalStatus_ShouldSetNewStatusAndWriteLog() {
         Rental rental = new Rental();
