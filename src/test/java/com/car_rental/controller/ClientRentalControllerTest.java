@@ -2,6 +2,7 @@ package com.car_rental.controller;
 
 import com.car_rental.dao.DataAccessException;
 import com.car_rental.entity.*;
+import com.car_rental.form.rental.ExpensesReport;
 import com.car_rental.form.rental.RentalDTO;
 import com.car_rental.security.UserDetailsImpl;
 import com.car_rental.service.CarService;
@@ -358,4 +359,121 @@ class ClientRentalControllerTest {
                 "Order cannot be cancelled at this stage."
         );
     }
+    @Test
+    void viewExpensesReport_ShouldReturnReportPage() {
+        User user = new User();
+        user.setId(5);
+
+        ExpensesReport report = mock(ExpensesReport.class);
+
+        LocalDate startDate = LocalDate.of(2025, 1, 1);
+        LocalDate endDate = LocalDate.of(2025, 12, 31);
+
+        when(userDetails.getUsername()).thenReturn("client");
+        when(userService.getUserByUsername("client")).thenReturn(user);
+        when(rentalService.getClientExpensesReport(5, startDate, endDate))
+                .thenReturn(report);
+
+        String result = controller.viewExpensesReport(
+                startDate,
+                endDate,
+                model,
+                redirectAttributes,
+                userDetails
+        );
+
+        assertEquals("clientRental/expensesReportPage", result);
+
+        verify(model).addAttribute("startDate", startDate);
+        verify(model).addAttribute("endDate", endDate);
+        verify(model).addAttribute("report", report);
+    }
+    @Test
+    void viewExpensesReport_ShouldReturnError_WhenStartDateAfterEndDate() {
+        User user = new User();
+
+        LocalDate startDate = LocalDate.of(2025, 12, 31);
+        LocalDate endDate = LocalDate.of(2025, 1, 1);
+
+        when(userDetails.getUsername()).thenReturn("client");
+        when(userService.getUserByUsername("client")).thenReturn(user);
+
+        String result = controller.viewExpensesReport(
+                startDate,
+                endDate,
+                model,
+                redirectAttributes,
+                userDetails
+        );
+
+        assertEquals("clientRental/expensesReportPage", result);
+
+        verify(model).addAttribute(
+                ERROR_MSG,
+                "Start date must not be after the end date."
+        );
+
+        verify(rentalService, never())
+                .getClientExpensesReport(anyInt(), any(), any());
+    }
+    @Test
+    void viewExpensesReport_ShouldRedirectToMain_WhenExceptionOccurs() {
+        when(userDetails.getUsername()).thenReturn("client");
+        when(userService.getUserByUsername("client"))
+                .thenThrow(new RuntimeException("DB error"));
+
+        String result = controller.viewExpensesReport(
+                LocalDate.now().minusDays(10),
+                LocalDate.now(),
+                model,
+                redirectAttributes,
+                userDetails
+        );
+
+        assertEquals(REDIRECT_TO_MAIN_PAGE, result);
+
+        verify(redirectAttributes)
+                .addFlashAttribute(eq(ERROR_MSG), any());
+    }
+    @Test
+    void viewExpensesReport_ShouldUseEarliestRentalDate_WhenDatesAreNull() {
+        User user = new User();
+        user.setId(5);
+
+        LocalDate earliestDate = LocalDate.of(2024, 1, 1);
+
+        ExpensesReport report = mock(ExpensesReport.class);
+
+        when(userDetails.getUsername()).thenReturn("client");
+        when(userService.getUserByUsername("client")).thenReturn(user);
+
+        when(rentalService.getClientEarliestReportableRentalDate(5))
+                .thenReturn(earliestDate);
+
+        when(rentalService.getClientExpensesReport(
+                eq(5),
+                eq(earliestDate),
+                any(LocalDate.class)))
+                .thenReturn(report);
+
+        String result = controller.viewExpensesReport(
+                null,
+                null,
+                model,
+                redirectAttributes,
+                userDetails
+        );
+
+        assertEquals("clientRental/expensesReportPage", result);
+
+        verify(rentalService)
+                .getClientEarliestReportableRentalDate(5);
+
+        verify(rentalService)
+                .getClientExpensesReport(
+                        eq(5),
+                        eq(earliestDate),
+                        any(LocalDate.class));
+    }
+
 }

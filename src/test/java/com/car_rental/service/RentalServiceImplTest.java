@@ -3,6 +3,7 @@ package com.car_rental.service;
 import com.car_rental.dao.DataAccessException;
 import com.car_rental.dao.daointerface.RentalDAO;
 import com.car_rental.entity.*;
+import com.car_rental.form.rental.ExpensesReport;
 import com.car_rental.form.rental.RentalStatusUpdateDTO;
 import org.junit.jupiter.api.Test;
 
@@ -268,5 +269,84 @@ class RentalServiceImplTest {
 
         assertEquals(rental, result);
         verify(rentalDAO).getRentalById(1);
+    }
+    @Test
+    void getClientExpensesReport_ShouldReturnReportWithTotals() {
+        Rental rental1 = new Rental();
+        rental1.setTotalCost(100);
+
+        Rental rental2 = new Rental();
+        rental2.setTotalCost(200);
+
+        LocalDate startDate = LocalDate.of(2025, 1, 1);
+        LocalDate endDate = LocalDate.of(2025, 12, 31);
+
+        when(rentalDAO.getClientReportRentals(5, startDate, endDate))
+                .thenReturn(List.of(rental1, rental2));
+
+        ExpensesReport report =
+                service.getClientExpensesReport(5, startDate, endDate);
+
+        assertEquals(2, report.getRentalCount());
+        assertEquals(300.0, report.getTotalSpent());
+        assertEquals(startDate, report.getStartDate());
+        assertEquals(endDate, report.getEndDate());
+        assertEquals(2, report.getRentals().size());
+
+        verify(rentalDAO)
+                .getClientReportRentals(5, startDate, endDate);
+    }
+    @Test
+    void getClientExpensesReport_ShouldReturnEmptyReport_WhenNoRentalsFound() {
+        LocalDate startDate = LocalDate.of(2025, 1, 1);
+        LocalDate endDate = LocalDate.of(2025, 12, 31);
+
+        when(rentalDAO.getClientReportRentals(5, startDate, endDate))
+                .thenReturn(List.of());
+
+        ExpensesReport report =
+                service.getClientExpensesReport(5, startDate, endDate);
+
+        assertEquals(0, report.getRentalCount());
+        assertEquals(0.0, report.getTotalSpent());
+        assertTrue(report.getRentals().isEmpty());
+    }
+    @Test
+    void getClientExpensesReport_ShouldThrowDataAccessException_WhenDaoFails() {
+        LocalDate startDate = LocalDate.of(2025, 1, 1);
+        LocalDate endDate = LocalDate.of(2025, 12, 31);
+
+        when(rentalDAO.getClientReportRentals(anyInt(), any(), any()))
+                .thenThrow(new RuntimeException("DB error"));
+
+        assertThrows(
+                DataAccessException.class,
+                () -> service.getClientExpensesReport(5, startDate, endDate)
+        );
+    }
+    @Test
+    void getClientEarliestReportableRentalDate_ShouldReturnEarliestDate() {
+        LocalDate earliest = LocalDate.of(2024, 5, 10);
+
+        when(rentalDAO.getClientEarliestReportableRentalDate(5))
+                .thenReturn(earliest);
+
+        LocalDate result =
+                service.getClientEarliestReportableRentalDate(5);
+
+        assertEquals(earliest, result);
+
+        verify(rentalDAO)
+                .getClientEarliestReportableRentalDate(5);
+    }
+    @Test
+    void getClientEarliestReportableRentalDate_ShouldThrowDataAccessException() {
+        when(rentalDAO.getClientEarliestReportableRentalDate(5))
+                .thenThrow(new RuntimeException("DB error"));
+
+        assertThrows(
+                DataAccessException.class,
+                () -> service.getClientEarliestReportableRentalDate(5)
+        );
     }
 }
