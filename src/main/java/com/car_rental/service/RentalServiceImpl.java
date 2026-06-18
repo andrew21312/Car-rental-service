@@ -216,7 +216,9 @@ public class RentalServiceImpl implements RentalService {
     @Override
     public ExpensesReport getClientExpensesReport(int clientId, LocalDate startDate, LocalDate endDate) {
         try {
-            return rentalDao.getClientExpensesReport(clientId, startDate, endDate);
+            List<Rental> rentals = rentalDao.getClientReportRentals(clientId, startDate, endDate);
+            double totalSpent = rentals.stream().mapToDouble(Rental::getTotalCost).sum();
+            return new ExpensesReport(rentals.size(), totalSpent, startDate, endDate, rentals);
         } catch (Exception e) {
             log.error("Error generating expenses report for client id {}: {}", clientId, e.getMessage(), e);
             throw new DataAccessException(utilityService.handleException(e));

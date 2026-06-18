@@ -124,12 +124,9 @@
             <artifactId>flatpickr</artifactId>
             <version>4.6.13</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.webjars.npm/sweetalert2 -->
-        <dependency>
-            <groupId>org.webjars.npm</groupId>
-            <artifactId>sweetalert2</artifactId>
-            <version>11.21.0</version>
-        </dependency>
+
+        <!-- SweetAlert2 is loaded from a CDN in fragments/headers.html, so no webjar dependency is required.
+             (org.webjars.npm:sweetalert2:11.21.0 is not published to Maven Central and broke the build.) -->
     </dependencies>
 
     <build>

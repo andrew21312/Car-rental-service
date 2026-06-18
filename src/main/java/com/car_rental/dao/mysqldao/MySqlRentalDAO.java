@@ -16,7 +16,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-import com.car_rental.form.rental.ExpensesReport;
 import com.car_rental.form.rental.FavoriteCarModelStat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -138,14 +137,11 @@ public class MySqlRentalDAO extends BasePaginationDAO implements RentalDAO {
     private static final String CLIENT_FILTER_ACTIVE =
             " AND rentals.status_id = (SELECT id FROM rental_statuses WHERE name = 'ACTIVE')";
 
-    private static final String CLIENT_EXPENSES_REPORT = """
-            SELECT COUNT(*) AS rental_count,
-                   COALESCE(SUM(rentals.total_cost), 0) AS total_spent
-            FROM rentals
-            JOIN rental_statuses ON rentals.status_id = rental_statuses.id
-            WHERE rentals.client_id = ?
-              AND rental_statuses.name IN ('ACTIVE', 'COMPLETED')
-              AND rentals.start_date BETWEEN ? AND ?
+    private static final String SELECT_CLIENT_REPORT_RENTALS = SELECT_ALL_RENTALS + """
+             WHERE rentals.client_id = ?
+               AND rental_statuses.name IN ('ACTIVE', 'COMPLETED')
+               AND rentals.start_date BETWEEN ? AND ?
+             ORDER BY rentals.start_date DESC
             """;
 
     private static final String CLIENT_EARLIEST_REPORTABLE_DATE = """
@@ -338,13 +334,8 @@ public class MySqlRentalDAO extends BasePaginationDAO implements RentalDAO {
     }
 
     @Override
-    public ExpensesReport getClientExpensesReport(int clientId, LocalDate startDate, LocalDate endDate) {
-        return jdbcTemplate.queryForObject(CLIENT_EXPENSES_REPORT,
-                (rs, rowNum) -> new ExpensesReport(
-                        rs.getInt("rental_count"),
-                        rs.getDouble("total_spent"),
-                        startDate,
-                        endDate),
+    public List<Rental> getClientReportRentals(int clientId, LocalDate startDate, LocalDate endDate) {
+        return jdbcTemplate.query(SELECT_CLIENT_REPORT_RENTALS, rentalRowMapper,
                 clientId, Date.valueOf(startDate), Date.valueOf(endDate));
     }
 
