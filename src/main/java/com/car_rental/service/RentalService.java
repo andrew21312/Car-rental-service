@@ -2,6 +2,7 @@ package com.car_rental.service;
 
 import com.car_rental.entity.PageResult;
 import com.car_rental.entity.Rental;
+import com.car_rental.form.rental.ExpensesReport;
 import com.car_rental.form.rental.FavoriteCarModelStat;
 
 import java.time.LocalDate;
@@ -22,6 +23,10 @@ public interface RentalService {
     List<String> getBlockedDatesForCar(int carId);
 
     PageResult<Rental> getClientRentalsPage(int clientId, String filter, int page, int size);
+
+    ExpensesReport getClientExpensesReport(int clientId, LocalDate startDate, LocalDate endDate);
+
+    LocalDate getClientEarliestReportableRentalDate(int clientId);
 
     boolean isValidStatusTransition(String currentStatus, String newStatus);
 

@@ -4,6 +4,7 @@ import static com.car_rental.constants.ControllerConstants.*;
 
 import com.car_rental.dao.DataAccessException;
 import com.car_rental.entity.*;
+import com.car_rental.form.rental.ExpensesReport;
 import com.car_rental.form.rental.FavoriteCarModelStat;
 import com.car_rental.form.rental.RentalDTO;
 import com.car_rental.security.UserDetailsImpl;
@@ -21,6 +22,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
@@ -41,6 +43,7 @@ public class ClientRentalController {
 
     private static final String RENTAL_PAGE = "clientRental/rentCarPage";
     private static final String RENTAL_HISTORY_PAGE = "clientRental/rentHistoryPage";
+    private static final String EXPENSES_REPORT_PAGE = "clientRental/expensesReportPage";
     private static final String REDIRECT_TO_RENTAL_HISTORY_PAGE = "redirect:/rentHistory";
 
     private final UserService userService;
@@ -145,6 +148,46 @@ public class ClientRentalController {
             return RENTAL_HISTORY_PAGE;
         } catch (Exception e) {
             logger.error("Failed to retrieve rentals: {}", e.getMessage(), e);
+            redirectAttributes.addFlashAttribute(ERROR_MSG, e.getMessage());
+            return REDIRECT_TO_MAIN_PAGE;
+        }
+    }
+
+    @GetMapping("/expensesReport")
+    public String viewExpensesReport(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            Model model,
+            RedirectAttributes redirectAttributes,
+            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+
+        try {
+            User client = userService.getUserByUsername(userDetails.getUsername());
+
+            // When no range is supplied, default it to span the client's full reportable
+            // history so the report is populated on first load. Seed/test data may predate
+            // the current date, in which case a fixed "last month" window would show nothing.
+            if (endDate == null) {
+                endDate = LocalDate.now();
+            }
+            if (startDate == null) {
+                LocalDate earliest = rentalService.getClientEarliestReportableRentalDate(client.getId());
+                startDate = (earliest != null && !earliest.isAfter(endDate)) ? earliest : endDate.minusMonths(1);
+            }
+
+            model.addAttribute("startDate", startDate);
+            model.addAttribute("endDate", endDate);
+
+            if (startDate.isAfter(endDate)) {
+                model.addAttribute(ERROR_MSG, "Start date must not be after the end date.");
+                return EXPENSES_REPORT_PAGE;
+            }
+
+            ExpensesReport report = rentalService.getClientExpensesReport(client.getId(), startDate, endDate);
+            model.addAttribute("report", report);
+            return EXPENSES_REPORT_PAGE;
+        } catch (Exception e) {
+            logger.error("Failed to generate expenses report: {}", e.getMessage(), e);
             redirectAttributes.addFlashAttribute(ERROR_MSG, e.getMessage());
             return REDIRECT_TO_MAIN_PAGE;
         }

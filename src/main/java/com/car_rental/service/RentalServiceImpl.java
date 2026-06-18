@@ -8,6 +8,7 @@ import com.car_rental.entity.Log;
 import com.car_rental.entity.PageResult;
 import com.car_rental.entity.Rental;
 import com.car_rental.entity.RentalStatuses;
+import com.car_rental.form.rental.ExpensesReport;
 import com.car_rental.form.rental.FavoriteCarModelStat;
 import com.car_rental.form.rental.RentalStatusUpdateDTO;
 
@@ -198,6 +199,45 @@ public class RentalServiceImpl implements RentalService {
             return rentalDao.getClientRentalsPage(clientId, filter, page, size);
         } catch (Exception e) {
             log.error("Error retrieving rentals by client id {}: {}", clientId, e.getMessage(), e);
+            throw new DataAccessException(utilityService.handleException(e));
+        }
+    }
+
+    /**
+     * Retrieves an expenses report for a client over a date range.
+     * Only ACTIVE and COMPLETED rentals are included.
+     *
+     * @param clientId  Client ID
+     * @param startDate Start of the reporting period (inclusive)
+     * @param endDate   End of the reporting period (inclusive)
+     * @return ExpensesReport with rental count and total amount spent
+     * @throws DataAccessException if there's an error generating the report
+     */
+    @Override
+    public ExpensesReport getClientExpensesReport(int clientId, LocalDate startDate, LocalDate endDate) {
+        try {
+            return rentalDao.getClientExpensesReport(clientId, startDate, endDate);
+        } catch (Exception e) {
+            log.error("Error generating expenses report for client id {}: {}", clientId, e.getMessage(), e);
+            throw new DataAccessException(utilityService.handleException(e));
+        }
+    }
+
+    /**
+     * Retrieves the earliest start date among a client's reportable (ACTIVE/COMPLETED)
+     * rentals, used to default the expenses report range to the client's full history.
+     *
+     * @param clientId Client ID
+     * @return earliest reportable rental start date, or null if the client has none
+     * @throws DataAccessException if there's an error retrieving the date
+     */
+    @Override
+    public LocalDate getClientEarliestReportableRentalDate(int clientId) {
+        try {
+            return rentalDao.getClientEarliestReportableRentalDate(clientId);
+        } catch (Exception e) {
+            log.error("Error retrieving earliest reportable rental date for client id {}: {}",
+                    clientId, e.getMessage(), e);
             throw new DataAccessException(utilityService.handleException(e));
         }
     }

@@ -87,6 +87,11 @@
                                     <i class="bi bi-clock-history me-1"></i> Rent History
                                 </a>
                             </li>
+                            <li sec:authorize="hasAuthority('CLIENT')">
+                                <a class="dropdown-item" href="/expensesReport">
+                                    <i class="bi bi-cash-stack me-1"></i> Expenses Report
+                                </a>
+                            </li>
                             <li><a class="dropdown-item" href="/logout">
                                 <i class="bi bi-box-arrow-right me-1"></i> Logout
                             </a></li>
@@ -278,7 +283,6 @@
         {id: 'engineType', param: 'engineType'},
         {id: 'sortBySelect', param: 'sortBy'},
         {id: 'seats', param: 'seats'}
-
     ]
 
     function updateEngineTypeFilter(selectElement) {

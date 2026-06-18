@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html data-bs-theme="dark" lang="uk" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/headers::head(title='Expenses Report')}"></head>
+<body class="bg-dark text-light">
+<!-- Navigation Bar -->
+<nav th:replace="~{mainPage::#navBar}">…</nav>
+
+<!-- Main Content Area -->
+<div class="container-lg my-5">
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-10 col-lg-8">
+
+            <!-- Page Title -->
+            <h2 class="display-6 text-center mb-2">My Expenses Report</h2>
+            <p class="text-center text-muted mb-5">
+                Includes only <span class="text-success">Active</span> and
+                <span class="text-info">Completed</span> rentals.
+            </p>
+
+            <!-- Date Range Filter -->
+            <form class="row g-3 align-items-end justify-content-center mb-5"
+                  id="reportForm" method="get" th:action="@{/expensesReport}">
+                <div class="col-12 col-sm-auto">
+                    <label class="form-label small text-muted" for="startDate">From</label>
+                    <input class="form-control bg-card text-light border-secondary" id="startDate"
+                           name="startDate" required th:value="${startDate}" type="date"/>
+                </div>
+                <div class="col-12 col-sm-auto">
+                    <label class="form-label small text-muted" for="endDate">To</label>
+                    <input class="form-control bg-card text-light border-secondary" id="endDate"
+                           name="endDate" required th:value="${endDate}" type="date"/>
+                </div>
+                <div class="col-12 col-sm-auto">
+                    <button class="btn btn-info fw-bold w-100" type="submit">
+                        <i class="bi bi-graph-up-arrow me-1"></i> Generate
+                    </button>
+                </div>
+            </form>
+
+            <!-- Empty State (No Rentals Found) -->
+            <div class="text-center py-5" th:if="${report != null and report.rentalCount == 0}">
+                <i class="bi bi-inbox display-1 text-muted d-block mb-3"></i>
+                <p class="fs-3 text-muted mb-0">No Rents Found</p>
+            </div>
+
+            <!-- Report Summary -->
+            <div class="row g-4 justify-content-center" th:if="${report != null and report.rentalCount > 0}">
+                <!-- Number of Rentals -->
+                <div class="col-12 col-md-6">
+                    <div class="card bg-card border-0 shadow-sm text-center h-100">
+                        <div class="card-body py-4">
+                            <i class="bi bi-receipt-cutoff fs-1 text-info d-block mb-2"></i>
+                            <h6 class="text-muted text-uppercase small mb-1">Number of Rentals</h6>
+                            <p class="display-5 fw-bold mb-0" th:text="${report.rentalCount}">0</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Amount Spent -->
+                <div class="col-12 col-md-6">
+                    <div class="card bg-card border-0 shadow-sm text-center h-100">
+                        <div class="card-body py-4">
+                            <i class="bi bi-cash-coin fs-1 text-success d-block mb-2"></i>
+                            <h6 class="text-muted text-uppercase small mb-1">Total Amount Spent</h6>
+                            <p class="display-5 fw-bold text-success mb-0"
+                               th:text="${#numbers.formatDecimal(report.totalSpent, 1, 2)} + ' $'">0.00 $</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Period -->
+                <div class="col-12">
+                    <p class="text-center text-muted small mb-0">
+                        <i class="bi bi-calendar-range me-1"></i>
+                        Period: <span th:text="${startDate}"></span> &ndash; <span th:text="${endDate}"></span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Re-generate the report whenever the customer changes the date range -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("reportForm");
+        document.querySelectorAll("#startDate, #endDate").forEach(function (input) {
+            input.addEventListener("change", function () {
+                form.submit();
+            });
+        });
+    });
+</script>
+</body>
+</html>

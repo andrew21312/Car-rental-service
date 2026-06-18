@@ -2,6 +2,7 @@ package com.car_rental.dao.daointerface;
 
 import com.car_rental.entity.PageResult;
 import com.car_rental.entity.Rental;
+import com.car_rental.form.rental.ExpensesReport;
 import com.car_rental.form.rental.FavoriteCarModelStat;
 
 import java.time.LocalDate;
@@ -22,6 +23,10 @@ public interface RentalDAO {
     List<String> getBlockedDatesForCar(int carId, int status1, int status2);
 
     PageResult<Rental> getClientRentalsPage(int clientId, String filter, int page, int size);
+
+    ExpensesReport getClientExpensesReport(int clientId, LocalDate startDate, LocalDate endDate);
+
+    LocalDate getClientEarliestReportableRentalDate(int clientId);
 
     boolean isCarAvailable(int carId, LocalDate startDate, LocalDate endDate, int status1, int status2);
 

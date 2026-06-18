@@ -16,6 +16,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import com.car_rental.form.rental.ExpensesReport;
 import com.car_rental.form.rental.FavoriteCarModelStat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -136,6 +137,24 @@ public class MySqlRentalDAO extends BasePaginationDAO implements RentalDAO {
             " AND rentals.status_id = (SELECT id FROM rental_statuses WHERE name = 'COMPLETED')";
     private static final String CLIENT_FILTER_ACTIVE =
             " AND rentals.status_id = (SELECT id FROM rental_statuses WHERE name = 'ACTIVE')";
+
+    private static final String CLIENT_EXPENSES_REPORT = """
+            SELECT COUNT(*) AS rental_count,
+                   COALESCE(SUM(rentals.total_cost), 0) AS total_spent
+            FROM rentals
+            JOIN rental_statuses ON rentals.status_id = rental_statuses.id
+            WHERE rentals.client_id = ?
+              AND rental_statuses.name IN ('ACTIVE', 'COMPLETED')
+              AND rentals.start_date BETWEEN ? AND ?
+            """;
+
+    private static final String CLIENT_EARLIEST_REPORTABLE_DATE = """
+            SELECT MIN(rentals.start_date)
+            FROM rentals
+            JOIN rental_statuses ON rentals.status_id = rental_statuses.id
+            WHERE rentals.client_id = ?
+              AND rental_statuses.name IN ('ACTIVE', 'COMPLETED')
+            """;
 
     private static final String FAVORITE_CAR_MODELS_LAST_MONTH = """
                 SELECT
@@ -316,6 +335,23 @@ public class MySqlRentalDAO extends BasePaginationDAO implements RentalDAO {
         if ("completed".equals(filter)) return CLIENT_FILTER_COMPLETED;
         if ("active".equals(filter)) return CLIENT_FILTER_ACTIVE;
         return "";
+    }
+
+    @Override
+    public ExpensesReport getClientExpensesReport(int clientId, LocalDate startDate, LocalDate endDate) {
+        return jdbcTemplate.queryForObject(CLIENT_EXPENSES_REPORT,
+                (rs, rowNum) -> new ExpensesReport(
+                        rs.getInt("rental_count"),
+                        rs.getDouble("total_spent"),
+                        startDate,
+                        endDate),
+                clientId, Date.valueOf(startDate), Date.valueOf(endDate));
+    }
+
+    @Override
+    public LocalDate getClientEarliestReportableRentalDate(int clientId) {
+        Date earliest = jdbcTemplate.queryForObject(CLIENT_EARLIEST_REPORTABLE_DATE, Date.class, clientId);
+        return earliest != null ? earliest.toLocalDate() : null;
     }
 
     private void loadRentalExtrasForRentals(List<Rental> rentals) {
